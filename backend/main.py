@@ -37,6 +37,9 @@ class Expense(BaseModel):
     genre: str
     amount: int
 
+class ExpenseWithId(Expense):
+    id: int
+
 @app.post("/expenses")
 def add_expense(expense: Expense):
     conn = sqlite3.connect(DB_PATH)
@@ -46,11 +49,21 @@ def add_expense(expense: Expense):
     conn.close()
     return {"message": "ok"}
 
-@app.get("/expenses", response_model=List[Expense])
+
+@app.get("/expenses", response_model=List[ExpenseWithId])
 def get_expenses():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT date, genre, amount FROM expenses ORDER BY id DESC")
+    c.execute("SELECT id, date, genre, amount FROM expenses ORDER BY id DESC")
     rows = c.fetchall()
     conn.close()
-    return [Expense(date=row[0], genre=row[1], amount=row[2]) for row in rows]
+    return [ExpenseWithId(id=row[0], date=row[1], genre=row[2], amount=row[3]) for row in rows]
+
+@app.delete("/expenses/{expense_id}")
+def delete_expense(expense_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
+    conn.commit()
+    conn.close()
+    return {"message": "deleted"}
