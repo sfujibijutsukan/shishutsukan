@@ -19,7 +19,7 @@ export default function App() {
   // 支出データを取得
   const fetchExpenses = async () => {
     try {
-      const response = await fetch('http://localhost:8000/expenses');
+  const response = await fetch('http://192.168.10.15:8000/expenses');
       const data = await response.json();
       setExpenses(data);
     } catch (error) {
@@ -40,7 +40,7 @@ export default function App() {
     };
     
     try {
-      await fetch('http://localhost:8000/expenses', {
+  await fetch('http://192.168.10.15:8000/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expense)
@@ -116,7 +116,7 @@ export default function App() {
     const handleDelete = async (id) => {
       if (!window.confirm('本当に削除しますか？')) return;
       try {
-        const res = await fetch(`http://localhost:8000/expenses/${id}`, { method: 'DELETE' });
+  const res = await fetch(`http://192.168.10.15:8000/expenses/${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('削除API失敗');
         setExpenses([]); // 一度空にしてから再取得
         await fetchExpenses();
@@ -136,11 +136,19 @@ export default function App() {
     return y === selectedYear && m === selectedMonth;
   });
 
+  // レスポンシブ対応: 画面幅でレイアウト切替
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
   return (
-    <div style={{ maxWidth: 1200, margin: '20px auto', padding: 20 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: 30, alignItems: 'start' }}>
+    <div style={{ maxWidth: 1200, margin: '20px auto', padding: isMobile ? 8 : 20 }}>
+      <div
+        style={
+          isMobile
+            ? { display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }
+            : { display: 'grid', gridTemplateColumns: '400px 1fr', gap: 30, alignItems: 'start' }
+        }
+      >
         {/* 支出入力フォーム＋支出一覧 */}
-  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 20, minHeight: 600 }}>
+  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
           <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出入力</h2>
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 20 }}>
@@ -325,7 +333,7 @@ export default function App() {
           )}
         </div>
         {/* グラフエリア（2つの棒グラフのみ表示） */}
-  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 20, minHeight: 600 }}>
+  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
           <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出分析</h2>
           {/* 今年の月別ジャンル別支出グラフ */}
           <div style={{ marginBottom: 40 }}>
@@ -346,17 +354,30 @@ export default function App() {
           {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
           <div>
             <h3 style={{ marginBottom: 15, fontSize: 18 }}>日別支出</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={dailyGenreArray}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" tickFormatter={d => `${parseInt(d, 10)}`} interval={0} />
+            <ResponsiveContainer width="100%" height={isMobile ? 600 : 250}>
+              {isMobile ? (
+                <BarChart data={dailyGenreArray} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <YAxis type="category" dataKey="day" tickFormatter={d => `${parseInt(d, 10)}`} interval={0} width={40} />
+                  <XAxis type="number" tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} />
+                  <Tooltip formatter={value => `${value.toLocaleString()}円`} />
+                  <Legend />
+                  {genres.map((g, idx) => (
+                    <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                  ))}
+                </BarChart>
+              ) : (
+                <BarChart data={dailyGenreArray}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day" tickFormatter={d => `${parseInt(d, 10)}`} interval={0} />
                   <YAxis tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} width={80} />
-                <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                <Legend />
-                {genres.map((g, idx) => (
-                  <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
-                ))}
-              </BarChart>
+                  <Tooltip formatter={value => `${value.toLocaleString()}円`} />
+                  <Legend />
+                  {genres.map((g, idx) => (
+                    <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                  ))}
+                </BarChart>
+              )}
             </ResponsiveContainer>
           </div>
         </div>
