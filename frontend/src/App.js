@@ -329,7 +329,7 @@ export default function App() {
           <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出分析</h2>
           {/* 今年の月別ジャンル別支出グラフ */}
           <div style={{ marginBottom: 40 }}>
-            <h3 style={{ marginBottom: 15, fontSize: 18 }}>月別支出（ジャンル別・今年）</h3>
+            <h3 style={{ marginBottom: 15, fontSize: 18 }}>月別支出</h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={monthlyGenreArray}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -345,7 +345,7 @@ export default function App() {
           </div>
           {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
           <div>
-            <h3 style={{ marginBottom: 15, fontSize: 18 }}>今月の日別支出（ジャンル別）</h3>
+            <h3 style={{ marginBottom: 15, fontSize: 18 }}>日別支出</h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={dailyGenreArray}>
                 <CartesianGrid strokeDasharray="3 3" />
