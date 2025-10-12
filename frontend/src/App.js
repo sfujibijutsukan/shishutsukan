@@ -73,35 +73,44 @@ export default function App() {
 
   const monthlyArray = Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
 
-    // ジャンル別・月ごとの集計
-    const genreMonthlyData = {};
-    expenses.forEach(expense => {
-      const month = expense.date.substring(0, 7);
-      if (!genreMonthlyData[month]) genreMonthlyData[month] = {};
-      if (!genreMonthlyData[month][expense.genre]) genreMonthlyData[month][expense.genre] = 0;
-      genreMonthlyData[month][expense.genre] += expense.amount;
-    });
-    // 棒グラフ用データ（月ごと）
-    const genreMonthlyArray = Object.keys(genreMonthlyData).sort().map(month => {
-      const obj = { month };
-      genres.forEach(g => { obj[g] = genreMonthlyData[month][g] || 0; });
-      return obj;
-    });
+  // 今年の月別ジャンル集計
+  const today = new Date();
+  const currentYear = today.getFullYear().toString();
+  const allMonths = Array.from({ length: 12 }, (_, i) => i + 1);
+  const monthlyGenreData = {};
+  expenses.forEach(expense => {
+    const [year, month] = expense.date.split('-');
+    if (year !== currentYear) return;
+    if (!monthlyGenreData[month]) monthlyGenreData[month] = {};
+    if (!monthlyGenreData[month][expense.genre]) monthlyGenreData[month][expense.genre] = 0;
+    monthlyGenreData[month][expense.genre] += expense.amount;
+  });
+  // 棒グラフ用データ（月ごと、今年のみ）
+  const monthlyGenreArray = allMonths.map(m => {
+    const monthStr = m.toString().padStart(2, '0');
+    const obj = { month: monthStr };
+    genres.forEach(g => { obj[g] = monthlyGenreData[monthStr]?.[g] || 0; });
+    return obj;
+  });
 
-    // ジャンル別・年ごとの集計
-    const genreYearlyData = {};
-    expenses.forEach(expense => {
-      const year = expense.date.substring(0, 4);
-      if (!genreYearlyData[year]) genreYearlyData[year] = {};
-      if (!genreYearlyData[year][expense.genre]) genreYearlyData[year][expense.genre] = 0;
-      genreYearlyData[year][expense.genre] += expense.amount;
-    });
-    // 棒グラフ用データ（年ごと）
-    const genreYearlyArray = Object.keys(genreYearlyData).sort().map(year => {
-      const obj = { year };
-      genres.forEach(g => { obj[g] = genreYearlyData[year][g] || 0; });
-      return obj;
-    });
+  // 今月の日別ジャンル集計
+  const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0');
+  const dailyGenreData = {};
+  expenses.forEach(expense => {
+    const [year, month, day] = expense.date.split('-');
+    if (year !== currentYear || month !== currentMonth) return;
+    if (!dailyGenreData[day]) dailyGenreData[day] = {};
+    if (!dailyGenreData[day][expense.genre]) dailyGenreData[day][expense.genre] = 0;
+    dailyGenreData[day][expense.genre] += expense.amount;
+  });
+  // 棒グラフ用データ（日ごと、今月のみ）
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const dailyGenreArray = Array.from({ length: daysInMonth }, (_, i) => {
+    const dayStr = (i + 1).toString().padStart(2, '0');
+    const obj = { day: dayStr };
+    genres.forEach(g => { obj[g] = dailyGenreData[dayStr]?.[g] || 0; });
+    return obj;
+  });
   
     // 支出削除処理
     const handleDelete = async (id) => {
@@ -117,11 +126,9 @@ export default function App() {
     };
 
   // 年・月選択用ステート
-  const today = new Date();
   const allYears = Array.from(new Set(expenses.map(e => e.date.substring(0, 4)))).sort();
-  const allMonths = Array.from({ length: 12 }, (_, i) => i + 1);
-  const [selectedYear, setSelectedYear] = useState(today.getFullYear().toString());
-  const [selectedMonth, setSelectedMonth] = useState((today.getMonth() + 1).toString().padStart(2, '0'));
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
   // 選択中の年・月の支出一覧
   const filteredExpenses = expenses.filter(e => {
@@ -132,8 +139,8 @@ export default function App() {
   return (
     <div style={{ maxWidth: 1200, margin: '20px auto', padding: 20 }}>
       <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: 30, alignItems: 'start' }}>
-        {/* 支出入力フォーム */}
-        <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 20 }}>
+        {/* 支出入力フォーム＋支出一覧 */}
+  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 20, minHeight: 600 }}>
           <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出入力</h2>
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 20 }}>
@@ -226,37 +233,53 @@ export default function App() {
               登録
             </button>
           </form>
-        </div>
 
-        {/* グラフエリア */}
-        <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 20 }}>
-          <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出分析</h2>
-          {/* 支出一覧テーブル */}
+          {/* 支出一覧テーブル（入力欄の下に表示） */}
           {expenses.length > 0 && (
-            <div style={{ marginBottom: 30 }}>
-              <h3 style={{ fontSize: 18, marginBottom: 10 }}>支出一覧</h3>
+            <div style={{ marginTop: 30, marginBottom: 0, maxHeight: 320, overflowY: 'auto', background: '#fafafa', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+              <h3 style={{ fontSize: 18, marginBottom: 10, position: 'sticky', top: 0, background: '#fafafa', zIndex: 1 }}>支出一覧</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
                 <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)} style={{ fontSize: 15, padding: '4px 8px', borderRadius: 4 }}>
                   {allYears.map(y => <option key={y} value={y}>{y}年</option>)}
                 </select>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {allMonths.map(m => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setSelectedMonth(m.toString().padStart(2, '0'))}
-                      style={{
-                        background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
-                        color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
-                        border: 'none',
-                        borderRadius: 4,
-                        padding: '2px 8px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer'
-                      }}
-                    >{m}</button>
-                  ))}
-                  <span style={{ marginLeft: 4 }}>月</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {[1,2,3,4,5,6].map(m => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setSelectedMonth(m.toString().padStart(2, '0'))}
+                        style={{
+                          background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
+                          color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
+                          border: 'none',
+                          borderRadius: 4,
+                          padding: '2px 8px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                      >{m}</button>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {[7,8,9,10,11,12].map(m => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setSelectedMonth(m.toString().padStart(2, '0'))}
+                        style={{
+                          background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
+                          color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
+                          border: 'none',
+                          borderRadius: 4,
+                          padding: '2px 8px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                      >{m}</button>
+                    ))}
+                  </div>
+                  <span style={{ marginLeft: 4 }}></span>
                 </div>
               </div>
               <div style={{ overflowX: 'auto' }}>
@@ -300,103 +323,42 @@ export default function App() {
               </div>
             </div>
           )}
-          
-          {expenses.length > 0 ? (
-            <>
-              {/* ジャンル別支出グラフ（横並び） */}
-              <div style={{ display: 'flex', gap: 30, marginBottom: 30 }}>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ marginBottom: 15, fontSize: 18 }}>ジャンル別支出（月ごと）</h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={genreMonthlyArray}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis tickFormatter={value => `${value.toLocaleString()}円`} />
-                      <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                      <Legend />
-                      {genres.map((g, idx) => (
-                        <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
-                      ))}
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ marginBottom: 15, fontSize: 18 }}>ジャンル別支出（年ごと）</h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={genreYearlyArray}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis tickFormatter={value => `${value.toLocaleString()}円`} />
-                      <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                      <Legend />
-                      {genres.map((g, idx) => (
-                        <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
-                      ))}
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* 月別棒グラフ */}
-              {monthlyArray.length > 0 && (
-                <div>
-                  <h3 style={{ marginBottom: 15, fontSize: 18 }}>月別支出（合計）</h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={monthlyArray}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis tickFormatter={value => `${value.toLocaleString()}円`} />
-                      <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                      <Legend />
-                      <Bar dataKey="total" fill="#1976d2" name="支出合計" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {/* ジャンル別円グラフ（合計） */}
-              {genreData.length > 0 && (
-                <div style={{ marginTop: 30 }}>
-                  <h3 style={{ marginBottom: 15, fontSize: 18 }}>ジャンル別支出（全期間合計）</h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie
-                        data={genreData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value, percent }) => `${name}: ${value.toLocaleString()}円 (${(percent * 100).toFixed(1)}%)`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {genreData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {/* 合計金額表示 */}
-              <div style={{ marginTop: 20, padding: 15, backgroundColor: '#f5f5f5', borderRadius: 6 }}>
-                <h4 style={{ margin: 0, marginBottom: 10 }}>支出サマリー</h4>
-                <p style={{ margin: 0, fontSize: 18, fontWeight: 'bold', color: '#1976d2' }}>
-                  総支出: {expenses.reduce((sum, expense) => sum + expense.amount, 0).toLocaleString()}円
-                </p>
-                <p style={{ margin: 0, marginTop: 5, color: '#666' }}>
-                  登録件数: {expenses.length}件
-                </p>
-              </div>
-            </>
-          ) : (
-            <div style={{ textAlign: 'center', padding: 40, color: '#666' }}>
-              <p>まだ支出データがありません。</p>
-              <p>左のフォームから支出を登録してください。</p>
-            </div>
-          )}
+        </div>
+        {/* グラフエリア（2つの棒グラフのみ表示） */}
+  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 20, minHeight: 600 }}>
+          <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出分析</h2>
+          {/* 今年の月別ジャンル別支出グラフ */}
+          <div style={{ marginBottom: 40 }}>
+            <h3 style={{ marginBottom: 15, fontSize: 18 }}>月別支出（ジャンル別・今年）</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={monthlyGenreArray}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" tickFormatter={m => `${parseInt(m, 10)}月`} />
+                  <YAxis tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} width={80} />
+                <Tooltip formatter={value => `${value.toLocaleString()}円`} />
+                <Legend />
+                {genres.map((g, idx) => (
+                  <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
+          <div>
+            <h3 style={{ marginBottom: 15, fontSize: 18 }}>今月の日別支出（ジャンル別）</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={dailyGenreArray}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" tickFormatter={d => `${parseInt(d, 10)}`} interval={0} />
+                  <YAxis tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} width={80} />
+                <Tooltip formatter={value => `${value.toLocaleString()}円`} />
+                <Legend />
+                {genres.map((g, idx) => (
+                  <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>
