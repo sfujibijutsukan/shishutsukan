@@ -16,6 +16,7 @@ jobs:
       - name: Send Discord notification
         env:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          API_URL: ${{ secrets.API_URL }}
         run: |
           curl -X POST -H "Content-Type: application/json" \
             -d "{\"content\": \"今日の支出を入力してください！\\n入力ページ: $API_URL\"}" \
