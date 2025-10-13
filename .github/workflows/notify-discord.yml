@@ -9,10 +9,14 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Get API URL from .env
+        run: |
+          API_URL=$(grep REACT_APP_API_URL frontend/.env | cut -d'=' -f2)
+          echo "API_URL=$API_URL" >> $GITHUB_ENV
       - name: Send Discord notification
         env:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           curl -X POST -H "Content-Type: application/json" \
-            -d '{"content": "今日の支出を入力してください！"}' \
+            -d "{\"content\": \"今日の支出を入力してください！\\n入力ページ: $API_URL\"}" \
             "$WEBHOOK_URL"
