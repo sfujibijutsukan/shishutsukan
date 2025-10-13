@@ -7,14 +7,17 @@ import 'react-datepicker/dist/react-datepicker.css';
 // 日本語ロケールを登録
 registerLocale('ja', ja);
 
-const genres = ['食費', '交通費', '消耗品', '特別費', 'その他'];
+const DEFAULT_GENRES = ['食費', '交通費', '消耗品', 'サブスク', '特別費', 'その他'];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF90B8', '#FF4560'];
 
 export default function App() {
+  const [showGenreEdit, setShowGenreEdit] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [genre, setGenre] = useState(genres[0]);
+  const [genres, setGenres] = useState([...DEFAULT_GENRES]);
+  const [genre, setGenre] = useState(DEFAULT_GENRES[0]);
   const [amount, setAmount] = useState('');
   const [expenses, setExpenses] = useState([]);
+  const [newGenre, setNewGenre] = useState('');
 
   // 支出データを取得
   const fetchExpenses = async () => {
@@ -149,7 +152,7 @@ export default function App() {
       >
         {/* 支出入力フォーム＋支出一覧 */}
   <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
-          <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出入力</h2>
+          {/* <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出入力</h2> */}
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 20 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>日付:</label>
@@ -178,7 +181,7 @@ export default function App() {
             </div>
             <div style={{ marginBottom: 20 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>ジャンル:</label>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
                 {genres.map(g => (
                   <button
                     type="button"
@@ -205,7 +208,62 @@ export default function App() {
                     {g}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setShowGenreEdit(v => !v)}
+                  style={{
+                    background: showGenreEdit ? '#1976d2' : '#f5f5f5',
+                    color: showGenreEdit ? '#fff' : '#333',
+                    border: '1px solid ' + (showGenreEdit ? '#1976d2' : '#ddd'),
+                    borderRadius: '50%',
+                    width: 40,
+                    height: 40,
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    marginLeft: 8,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s'
+                  }}
+                  title={showGenreEdit ? 'ジャンル追加・削除欄を隠す' : 'ジャンル追加・削除欄を表示'}
+                >＋</button>
               </div>
+              {showGenreEdit && (
+                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                  <input
+                    type="text"
+                    value={newGenre}
+                    onChange={e => setNewGenre(e.target.value)}
+                    placeholder="ジャンル名を入力"
+                    style={{ width: 120, padding: '6px 8px', borderRadius: 4, border: '1px solid #ccc', fontSize: 15 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = newGenre.trim();
+                      if (val && !genres.includes(val)) {
+                        setGenres([...genres, val]);
+                        setNewGenre('');
+                      }
+                    }}
+                    style={{ padding: '6px 16px', borderRadius: 4, background: '#1976d2', color: '#fff', border: 'none', fontWeight: 'bold', fontSize: 15, cursor: 'pointer' }}
+                  >追加</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = newGenre.trim();
+                      if (val && genres.includes(val) && genres.length > 1) {
+                        setGenres(genres.filter(x => x !== val));
+                        if (genre === val) setGenre(genres.filter(x => x !== val)[0] || '');
+                        setNewGenre('');
+                      }
+                    }}
+                    style={{ padding: '6px 16px', borderRadius: 4, background: '#e53935', color: '#fff', border: 'none', fontWeight: 'bold', fontSize: 15, cursor: 'pointer' }}
+                  >削除</button>
+                </div>
+              )}
             </div>
             <div style={{ marginBottom: 20 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>金額:</label>
@@ -351,7 +409,7 @@ export default function App() {
         </div>
         {/* グラフエリア（2つの棒グラフのみ表示） */}
   <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
-          <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出分析</h2>
+          {/* <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出分析</h2> */}
           {/* 今年の月別ジャンル別支出グラフ */}
           <div style={{ marginBottom: 40 }}>
             <h3 style={{ marginBottom: 15, fontSize: 18 }}>月別支出</h3>
