@@ -7,7 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 // 日本語ロケールを登録
 registerLocale('ja', ja);
 
-const genres = ['食費', '交通費', '外食費', '消耗品', '特別費', 'その他'];
+const genres = ['食費', '交通費', '消耗品', '特別費', 'その他'];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF90B8', '#FF4560'];
 
 export default function App() {
@@ -19,7 +19,7 @@ export default function App() {
   // 支出データを取得
   const fetchExpenses = async () => {
     try {
-  const response = await fetch('http://192.168.10.15:8000/expenses');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}`);
       const data = await response.json();
       setExpenses(data);
     } catch (error) {
@@ -40,7 +40,7 @@ export default function App() {
     };
     
     try {
-  await fetch('http://192.168.10.15:8000/expenses', {
+  await fetch(`${process.env.REACT_APP_API_URL}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expense)
@@ -116,7 +116,7 @@ export default function App() {
     const handleDelete = async (id) => {
       if (!window.confirm('本当に削除しますか？')) return;
       try {
-  const res = await fetch(`http://192.168.10.15:8000/expenses/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${process.env.REACT_APP_API_URL}/${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('削除API失敗');
         setExpenses([]); // 一度空にしてから再取得
         await fetchExpenses();
@@ -189,9 +189,16 @@ export default function App() {
                       color: genre === g ? '#fff' : '#333',
                       border: '1px solid ' + (genre === g ? '#1976d2' : '#ddd'),
                       borderRadius: 6,
-                      padding: '8px 16px',
+                      width: 100,
+                      height: 40,
+                      padding: 0,
+                      margin: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       cursor: 'pointer',
-                      fontSize: 14,
+                      fontSize: 16,
+                      fontWeight: 'bold',
                       transition: 'all 0.2s'
                     }}
                   >
@@ -258,6 +265,11 @@ export default function App() {
                         type="button"
                         onClick={() => setSelectedMonth(m.toString().padStart(2, '0'))}
                         style={{
+                          width: 32,
+                          height: 32,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
                           color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
                           border: 'none',
@@ -276,6 +288,11 @@ export default function App() {
                         type="button"
                         onClick={() => setSelectedMonth(m.toString().padStart(2, '0'))}
                         style={{
+                          width: 32,
+                          height: 32,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
                           color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
                           border: 'none',
