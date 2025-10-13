@@ -1,0 +1,17 @@
+name: Daily Expense Notification
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # 毎日夜9時(JST)に実行
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord notification
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"content": "今日の支出を入力してください！"}' \
+            "$WEBHOOK_URL"
