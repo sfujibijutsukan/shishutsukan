@@ -8,19 +8,11 @@ React（フロントエンド） + FastAPI（バックエンド） + SQLite（�
 ## 操作画面
 一覧性・操作性を重視したシンプルなUIで、PC・スマホ両対応のレスポンシブデザインを採用。
 
+<img src="./docs/pc.png" alt="PC版" width="500" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+<p>PC版</p>
 
-<table>
-   <tr>
-      <td align="center" style="vertical-align:top;">
-         <b>PC版</b><br>
-         <img src="pc.png" alt="PC版" width="350" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-      </td>
-      <td align="center" style="vertical-align:top;">
-         <b>スマホ版</b><br>
-         <img src="phone.jpg" alt="スマホ版" width="160" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-      </td>
-   </tr>
-</table>
+<img src="./docs/phone.jpg" alt="スマホ版" width="160" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+<p>スマホ版</p>
 
 ## 主な機能
 
