@@ -8,11 +8,14 @@ React（フロントエンド） + FastAPI（バックエンド） + SQLite（�
 ## 操作画面
 一覧性・操作性を重視したシンプルなUIで、PC・スマホ両対応のレスポンシブデザインを採用。
 
+<p><b>PC版</b></p>
 <img src="./docs/pc.png" alt="PC版" width="500" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<p>PC版</p>
 
-<img src="./docs/phone.jpg" alt="スマホ版" width="160" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-<p>スマホ版</p>
+<p><b>スマホ版</b></p>
+<div style="display: flex; gap: 10px;">
+<img src="./docs/phone1.png" alt="スマホ版" width="160" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+<img src="./docs/phone2.png" alt="スマホ版" width="160" style="border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+</div>
 
 ## 主な機能
 
@@ -70,12 +73,6 @@ DBは SQLite の `expenses` テーブルを利用
 - フロントエンド：React + recharts + react-datepicker
 - バックエンド：FastAPI + SQLite
 - Docker対応
-
----
-
-## ライセンス
-
-`LICENSE` ファイルを参照してください。
 
 ---
 
