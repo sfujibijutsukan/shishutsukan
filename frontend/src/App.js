@@ -13,8 +13,16 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF90B8', '#FF4560'
 export default function App() {
   const [showGenreEdit, setShowGenreEdit] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [genres, setGenres] = useState([...DEFAULT_GENRES]);
-  const [genre, setGenre] = useState(DEFAULT_GENRES[0]);
+  // localStorageからジャンルを読み込み、なければデフォルトを使用
+  const [genres, setGenres] = useState(() => {
+    const savedGenres = localStorage.getItem('expenseGenres');
+    return savedGenres ? JSON.parse(savedGenres) : [...DEFAULT_GENRES];
+  });
+  const [genre, setGenre] = useState(() => {
+    const savedGenres = localStorage.getItem('expenseGenres');
+    const initialGenres = savedGenres ? JSON.parse(savedGenres) : DEFAULT_GENRES;
+    return initialGenres[0] || DEFAULT_GENRES[0];
+  });
   const [amount, setAmount] = useState('');
   const [expenses, setExpenses] = useState([]);
   const [newGenre, setNewGenre] = useState('');
@@ -33,6 +41,11 @@ export default function App() {
   useEffect(() => {
     fetchExpenses();
   }, []);
+
+  // ジャンルが変更されたときにlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('expenseGenres', JSON.stringify(genres));
+  }, [genres]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -219,7 +232,8 @@ export default function App() {
                     onClick={() => {
                       const val = newGenre.trim();
                       if (val && !genres.includes(val)) {
-                        setGenres([...genres, val]);
+                        const newGenres = [...genres, val];
+                        setGenres(newGenres);
                         setNewGenre('');
                       }
                     }}
@@ -230,8 +244,9 @@ export default function App() {
                     onClick={() => {
                       const val = newGenre.trim();
                       if (val && genres.includes(val) && genres.length > 1) {
-                        setGenres(genres.filter(x => x !== val));
-                        if (genre === val) setGenre(genres.filter(x => x !== val)[0] || '');
+                        const newGenres = genres.filter(x => x !== val);
+                        setGenres(newGenres);
+                        if (genre === val) setGenre(newGenres[0] || '');
                         setNewGenre('');
                       }
                     }}
