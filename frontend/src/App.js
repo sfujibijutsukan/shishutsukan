@@ -154,33 +154,8 @@ export default function App() {
   <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
           {/* <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出入力</h2> */}
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>日付:</label>
-              <DatePicker
-                selected={selectedDate}
-                onChange={date => setSelectedDate(date)}
-                dateFormat="yyyy/MM/dd"
-                locale="ja"
-                placeholderText="日付を選択してください"
-                showMonthDropdown
-                showYearDropdown
-                dropdownMode="select"
-                customInput={
-                  <input
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ccc',
-                      borderRadius: 4,
-                      fontSize: 16,
-                      cursor: 'pointer'
-                    }}
-                  />
-                }
-              />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>ジャンル:</label>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold', fontSize: 15 }}>ジャンル</label>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
                 {genres.map(g => (
                   <button
@@ -228,7 +203,7 @@ export default function App() {
                     transition: 'all 0.2s'
                   }}
                   title={showGenreEdit ? 'ジャンル追加・削除欄を隠す' : 'ジャンル追加・削除欄を表示'}
-                >＋</button>
+                >+</button>
               </div>
               {showGenreEdit && (
                 <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
@@ -265,7 +240,57 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', marginBottom: 14, alignItems: 'flex-end' }}>
+              <div style={{ flex: 1, maxWidth: 120 }}>
+                <label style={{ display: 'block', marginBottom: 4, fontWeight: 'bold', fontSize: 15 }}>日付</label>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={date => setSelectedDate(date)}
+                  dateFormat="yyyy/MM/dd"
+                  locale="ja"
+                  placeholderText="日付を選択してください"
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  customInput={
+                    <input
+                      style={{
+                        width: 100,
+                        minWidth: 80,
+                        padding: '10px 0px',
+                        border: '1px solid #ccc',
+                        borderRadius: 4,
+                        fontSize: 15,
+                        textAlign: 'center',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  }
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: 4, fontWeight: 'bold', fontSize: 15 }}>金額</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 10px',
+                      border: '1px solid #ccc',
+                      borderRadius: 4,
+                      fontSize: 15
+                    }}
+                    placeholder="金額"
+                    required
+                    min={1}
+                  />
+                  <span style={{ fontSize: 15, color: '#666' }}>円</span>
+                </div>
+              </div>
+            </div>
+            {/* <div style={{ marginBottom: 20 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>金額:</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input
@@ -285,7 +310,7 @@ export default function App() {
                 />
                 <span style={{ fontSize: 16, color: '#666' }}>円</span>
               </div>
-            </div>
+            </div> */}
             <button
               type="submit"
               style={{
