@@ -142,7 +142,7 @@ export default function App() {
   // レスポンシブ対応: 画面幅でレイアウト切替
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
   return (
-    <div style={{ maxWidth: 1200, margin: '20px auto', padding: isMobile ? 8 : 20 }}>
+    <div style={{ background: '#f5f5f5', maxWidth: 1200, margin: '20px auto', padding: isMobile ? 8 : 20 }}>
       <div
         style={
           isMobile
