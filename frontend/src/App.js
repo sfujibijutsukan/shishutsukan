@@ -643,15 +643,61 @@ export default function App() {
             }}>
               {currentYear}年
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={monthlyGenreArray}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tickFormatter={m => `${parseInt(m, 10)}月`} />
-                  <YAxis tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} width={80} />
-                <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                <Legend />
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart 
+                data={monthlyGenreArray}
+                margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                barCategoryGap="15%"
+              >
+                <CartesianGrid 
+                  strokeDasharray="2 2" 
+                  stroke="#e8eaed" 
+                  vertical={false} 
+                />
+                <XAxis 
+                  dataKey="month" 
+                  tickFormatter={m => `${parseInt(m, 10)}月`}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: '#5f6368' }}
+                />
+                <YAxis 
+                  tickFormatter={value => `${value.toLocaleString()}円`} 
+                  domain={[0, 'dataMax']} 
+                  allowDecimals={false} 
+                  width={80}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: '#5f6368' }}
+                />
+                <Tooltip 
+                  formatter={value => [`${value.toLocaleString()}円`, '']}
+                  labelFormatter={label => `${parseInt(label, 10)}月`}
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e8eaed',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    fontSize: '14px',
+                    fontFamily: 'Roboto, Arial, sans-serif'
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{ 
+                    color: '#202124',
+                    fontSize: '12px',
+                    fontFamily: 'Roboto, Arial, sans-serif'
+                  }}
+                />
                 {genres.map((g, idx) => (
-                  <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                  <Bar 
+                    key={g} 
+                    dataKey={g} 
+                    stackId="a"
+                    fill={COLORS[idx % COLORS.length]} 
+                    name={g}
+                    radius={idx === genres.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                  />
                 ))}
               </BarChart>
             </ResponsiveContainer>
@@ -674,27 +720,124 @@ export default function App() {
             }}>
               {currentMonth}月
             </h3>
-            <ResponsiveContainer width="100%" height={isMobile ? 600 : 250}>
+            <ResponsiveContainer width="100%" height={isMobile ? 600 : 300}>
               {isMobile ? (
-                <BarChart data={dailyGenreArray} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <YAxis type="category" dataKey="day" tickFormatter={d => `${parseInt(d, 10)}`} interval={0} width={40} />
-                  <XAxis type="number" tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} />
-                  <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                  <Legend />
+                <BarChart 
+                  data={dailyGenreArray} 
+                  layout="vertical"
+                  margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                  barCategoryGap="15%"
+                >
+                  <CartesianGrid 
+                    strokeDasharray="2 2" 
+                    stroke="#e8eaed" 
+                    horizontal={false} 
+                  />
+                  <YAxis 
+                    type="category" 
+                    dataKey="day" 
+                    tickFormatter={d => `${parseInt(d, 10)}`} 
+                    interval={0} 
+                    width={30}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: '#5f6368' }}
+                  />
+                  <XAxis 
+                    type="number" 
+                    tickFormatter={value => `${value.toLocaleString()}円`} 
+                    domain={[0, 'dataMax']} 
+                    allowDecimals={false}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: '#5f6368' }}
+                  />
+                  <Tooltip 
+                    formatter={value => [`${value.toLocaleString()}円`, '']}
+                    labelFormatter={label => `${parseInt(label, 10)}日`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e8eaed',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ 
+                      color: '#202124',
+                      fontSize: '12px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
                   {genres.map((g, idx) => (
-                    <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                    <Bar 
+                      key={g} 
+                      dataKey={g} 
+                      stackId="a"
+                      fill={COLORS[idx % COLORS.length]} 
+                      name={g}
+                      radius={idx === genres.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
+                    />
                   ))}
                 </BarChart>
               ) : (
-                <BarChart data={dailyGenreArray}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" tickFormatter={d => `${parseInt(d, 10)}`} interval={0} />
-                  <YAxis tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} width={80} />
-                  <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                  <Legend />
+                <BarChart 
+                  data={dailyGenreArray}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                  barCategoryGap="15%"
+                >
+                  <CartesianGrid 
+                    strokeDasharray="2 2" 
+                    stroke="#e8eaed" 
+                    vertical={false} 
+                  />
+                  <XAxis 
+                    dataKey="day" 
+                    tickFormatter={d => `${parseInt(d, 10)}`} 
+                    interval={0}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: '#5f6368' }}
+                  />
+                  <YAxis 
+                    tickFormatter={value => `${value.toLocaleString()}円`} 
+                    domain={[0, 'dataMax']} 
+                    allowDecimals={false} 
+                    width={80}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: '#5f6368' }}
+                  />
+                  <Tooltip 
+                    formatter={value => [`${value.toLocaleString()}円`, '']}
+                    labelFormatter={label => `${parseInt(label, 10)}日`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e8eaed',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ 
+                      color: '#202124',
+                      fontSize: '12px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
                   {genres.map((g, idx) => (
-                    <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                    <Bar 
+                      key={g} 
+                      dataKey={g} 
+                      stackId="a"
+                      fill={COLORS[idx % COLORS.length]} 
+                      name={g}
+                      radius={idx === genres.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                    />
                   ))}
                 </BarChart>
               )}
