@@ -8,7 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 registerLocale('ja', ja);
 
 const DEFAULT_GENRES = ['食費', '交通費', '消耗品', 'サブスク', '特別費', 'その他'];
-const COLORS = ['#4163adff', '#34a853', '#fbbc04', '#ea4335', '#dd5bbeff', '#741b8bff', '#1a73e8', '#137333', '#f9ab00', '#d93025'];
+const COLORS = ['#4163adff', '#875095ff', '#ea4335', '#dd5bbeff', '#fbbc04', '#34a853', '#1a73e8', '#137333', '#f9ab00', '#d93025'];
 
 export default function App() {
   // 凡例をカスタムレンダリングするコンポーネント(フォント色を黒に変更・中央寄せ)
