@@ -11,6 +11,25 @@ const DEFAULT_GENRES = ['食費', '交通費', '消耗品', 'サブスク', '特
 const COLORS = ['#4163adff', '#34a853', '#fbbc04', '#ea4335', '#dd5bbeff', '#741b8bff', '#1a73e8', '#137333', '#f9ab00', '#d93025'];
 
 export default function App() {
+  // 凡例をカスタムレンダリングするコンポーネント(フォント色を黒に変更・中央寄せ)
+  const renderLegend = (props) => (
+    <ul style={{ color: '#000', fontSize: '12px', fontFamily: 'Roboto, Arial, sans-serif', margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+      {props.payload.map((entry, index) => (
+        <li key={`item-${index}`} style={{ marginRight: 16, display: 'flex', alignItems: 'center' }}>
+          <span style={{
+            display: 'inline-block',
+            width: 12,
+            height: 12,
+            backgroundColor: entry.color,
+            marginRight: 6,
+            borderRadius: 2,
+            border: '1px solid #ccc'
+          }} />
+          <span style={{ color: '#000' }}>{entry.value}</span>
+        </li>
+      ))}
+    </ul>
+  );
   // DatePickerのz-indexを確実にするためのスタイル
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -684,11 +703,7 @@ export default function App() {
                   }}
                 />
                 <Legend 
-                  wrapperStyle={{ 
-                    color: '#202124',
-                    fontSize: '12px',
-                    fontFamily: 'Roboto, Arial, sans-serif'
-                  }}
+                  content={renderLegend}
                 />
                 {genres.map((g, idx) => (
                   <Bar 
@@ -767,11 +782,7 @@ export default function App() {
                     }}
                   />
                   <Legend 
-                    wrapperStyle={{ 
-                      color: '#202124',
-                      fontSize: '12px',
-                      fontFamily: 'Roboto, Arial, sans-serif'
-                    }}
+                    content={renderLegend}
                   />
                   {genres.map((g, idx) => (
                     <Bar 
@@ -826,11 +837,7 @@ export default function App() {
                     }}
                   />
                   <Legend 
-                    wrapperStyle={{ 
-                      color: '#202124',
-                      fontSize: '12px',
-                      fontFamily: 'Roboto, Arial, sans-serif'
-                    }}
+                    content={renderLegend}
                   />
                   {genres.map((g, idx) => (
                     <Bar 
