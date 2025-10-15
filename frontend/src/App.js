@@ -660,7 +660,7 @@ export default function App() {
               fontFamily: 'Roboto, Arial, sans-serif',
               margin: '0 0 16px 0'
             }}>
-              {currentYear}年の支出
+              {currentYear}年の支出 (月別)
             </h3>
             <ResponsiveContainer width="100%" height={265}>
               <BarChart 
@@ -734,7 +734,7 @@ export default function App() {
               fontFamily: 'Roboto, Arial, sans-serif',
               margin: '0 0 16px 0'
             }}>
-              {currentMonth}月の支出
+              {currentMonth}月の支出 (日別)
             </h3>
             <ResponsiveContainer width="100%" height={isMobile ? 600 : 270}>
               {isMobile ? (
