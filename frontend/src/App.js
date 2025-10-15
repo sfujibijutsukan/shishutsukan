@@ -519,7 +519,7 @@ export default function App() {
 
           {/* 支出一覧テーブル（入力欄の下に表示） */}
           {expenses.length > 0 && (
-            <div style={{ marginTop: 30, marginBottom: 0, maxHeight: 360, overflowY: 'auto', background: '#fafafa', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ marginTop: 30, marginBottom: 0, maxHeight: 380, overflowY: 'auto', background: '#fafafa', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
               <h3 style={{ fontSize: 18, marginBottom: 10, position: 'sticky', top: 0, background: '#fafafa', zIndex: 0 }}>支出一覧</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
                 <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)} style={{ fontSize: 15, padding: '4px 8px', borderRadius: 4 }}>
@@ -660,9 +660,9 @@ export default function App() {
               fontFamily: 'Roboto, Arial, sans-serif',
               margin: '0 0 16px 0'
             }}>
-              {currentYear}年
+              {currentYear}年の支出
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart 
                 data={monthlyGenreArray}
                 margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
@@ -734,9 +734,9 @@ export default function App() {
               fontFamily: 'Roboto, Arial, sans-serif',
               margin: '0 0 16px 0'
             }}>
-              {currentMonth}月
+              {currentMonth}月の支出
             </h3>
-            <ResponsiveContainer width="100%" height={isMobile ? 600 : 300}>
+            <ResponsiveContainer width="100%" height={isMobile ? 600 : 240}>
               {isMobile ? (
                 <BarChart 
                   data={dailyGenreArray} 
