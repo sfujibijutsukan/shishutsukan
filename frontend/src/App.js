@@ -8,13 +8,38 @@ import 'react-datepicker/dist/react-datepicker.css';
 registerLocale('ja', ja);
 
 const DEFAULT_GENRES = ['食費', '交通費', '消耗品', 'サブスク', '特別費', 'その他'];
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF90B8', '#FF4560'];
+const COLORS = ['#4163adff', '#34a853', '#fbbc04', '#ea4335', '#dd5bbeff', '#741b8bff', '#1a73e8', '#137333', '#f9ab00', '#d93025'];
 
 export default function App() {
+  // DatePickerのz-indexを確実にするためのスタイル
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .react-datepicker-popper,
+      .datepicker-popper,
+      .react-datepicker {
+        z-index: 10000 !important;
+      }
+      .react-datepicker__portal {
+        z-index: 10000 !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   const [showGenreEdit, setShowGenreEdit] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [genres, setGenres] = useState([...DEFAULT_GENRES]);
-  const [genre, setGenre] = useState(DEFAULT_GENRES[0]);
+  // localStorageからジャンルを読み込み、なければデフォルトを使用
+  const [genres, setGenres] = useState(() => {
+    const savedGenres = localStorage.getItem('expenseGenres');
+    return savedGenres ? JSON.parse(savedGenres) : [...DEFAULT_GENRES];
+  });
+  const [genre, setGenre] = useState(() => {
+    const savedGenres = localStorage.getItem('expenseGenres');
+    const initialGenres = savedGenres ? JSON.parse(savedGenres) : DEFAULT_GENRES;
+    return initialGenres[0] || DEFAULT_GENRES[0];
+  });
   const [amount, setAmount] = useState('');
   const [expenses, setExpenses] = useState([]);
   const [newGenre, setNewGenre] = useState('');
@@ -33,6 +58,11 @@ export default function App() {
   useEffect(() => {
     fetchExpenses();
   }, []);
+
+  // ジャンルが変更されたときにlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('expenseGenres', JSON.stringify(genres));
+  }, [genres]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -142,45 +172,84 @@ export default function App() {
   // レスポンシブ対応: 画面幅でレイアウト切替
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
   return (
-    <div style={{ background: '#f5f5f5', maxWidth: 1200, margin: '20px auto', padding: isMobile ? 8 : 20 }}>
-      <div
-        style={
-          isMobile
-            ? { display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }
-            : { display: 'grid', gridTemplateColumns: '400px 1fr', gap: 30, alignItems: 'start' }
-        }
-      >
+    <div style={{ 
+      minHeight: '100vh',
+      background: '#f8f9fa',
+      padding: isMobile ? 12 : 24
+    }}>
+      <div style={{ 
+        maxWidth: 1200, 
+        margin: '0 auto', 
+        padding: 0,
+        background: '#ffffff',
+        borderRadius: 8,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        border: '1px solid #e8eaed'
+      }}>
+        {/* <div style={{
+          padding: isMobile ? 16 : 24,
+          borderBottom: '1px solid #e8eaed'
+        }}>
+          <h1 style={{ 
+            textAlign: 'left', 
+            color: '#202124', 
+            fontSize: isMobile ? 24 : 28, 
+            fontWeight: '400', 
+            margin: 0,
+            fontFamily: 'Google Sans, Roboto, Arial, sans-serif'
+          }}>
+            支出管理
+          </h1>
+          <p style={{
+            color: '#5f6368',
+            fontSize: 14,
+            margin: '4px 0 0 0',
+            fontFamily: 'Roboto, Arial, sans-serif'
+          }}>
+            家計の支出を記録・分析できます
+          </p>
+        </div> */}
+        <div style={{ padding: isMobile ? 16 : 24 }}>
+        <div
+          style={
+            isMobile
+              ? { display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'stretch' }
+              : { display: 'grid', gridTemplateColumns: '420px 1fr', gap: 30, alignItems: 'start' }
+          }
+        >
         {/* 支出入力フォーム＋支出一覧 */}
-  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
-          {/* <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出入力</h2> */}
+  <div style={{ 
+    border: '1px solid #e8eaed', 
+    borderRadius: 8, 
+    padding: isMobile ? 16 : 20, 
+    minHeight: isMobile ? 400 : 600, 
+    background: '#ffffff', 
+    boxSizing: 'border-box', 
+    width: '100%', 
+    overflowX: 'auto', 
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' 
+  }}>
+          <h2 style={{ 
+            marginTop: 0, 
+            marginBottom: 20, 
+            color: '#202124', 
+            fontSize: 18, 
+            fontWeight: '500', 
+            textAlign: 'left',
+            fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+            borderBottom: '1px solid #e8eaed', 
+            paddingBottom: 12 
+          }}>支出入力</h2>
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>日付:</label>
-              <DatePicker
-                selected={selectedDate}
-                onChange={date => setSelectedDate(date)}
-                dateFormat="yyyy/MM/dd"
-                locale="ja"
-                placeholderText="日付を選択してください"
-                showMonthDropdown
-                showYearDropdown
-                dropdownMode="select"
-                customInput={
-                  <input
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ccc',
-                      borderRadius: 4,
-                      fontSize: 16,
-                      cursor: 'pointer'
-                    }}
-                  />
-                }
-              />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>ジャンル:</label>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: 8, 
+                fontWeight: '500', 
+                fontSize: 14,
+                color: '#202124',
+                fontFamily: 'Roboto, Arial, sans-serif'
+              }}>ジャンル</label>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
                 {genres.map(g => (
                   <button
@@ -188,21 +257,22 @@ export default function App() {
                     key={g}
                     onClick={() => setGenre(g)}
                     style={{
-                      background: genre === g ? '#1976d2' : '#f5f5f5',
-                      color: genre === g ? '#fff' : '#333',
-                      border: '1px solid ' + (genre === g ? '#1976d2' : '#ddd'),
-                      borderRadius: 6,
+                      background: genre === g ? '#141619ff' : '#f8f9fa',
+                      color: genre === g ? '#ffffff' : '#5f6368',
+                      border: '1px solid ' + (genre === g ? '#141619ff' : '#dadce0'),
+                      borderRadius: 4,
                       width: 100,
-                      height: 40,
+                      height: 36,
                       padding: 0,
                       margin: 0,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer',
-                      fontSize: 16,
-                      fontWeight: 'bold',
-                      transition: 'all 0.2s'
+                      fontSize: 14,
+                      fontWeight: '500',
+                      transition: 'all 0.2s',
+                      fontFamily: 'Roboto, Arial, sans-serif'
                     }}
                   >
                     {g}
@@ -212,14 +282,14 @@ export default function App() {
                   type="button"
                   onClick={() => setShowGenreEdit(v => !v)}
                   style={{
-                    background: showGenreEdit ? '#1976d2' : '#f5f5f5',
-                    color: showGenreEdit ? '#fff' : '#333',
-                    border: '1px solid ' + (showGenreEdit ? '#1976d2' : '#ddd'),
-                    borderRadius: '50%',
-                    width: 40,
-                    height: 40,
-                    fontSize: 24,
-                    fontWeight: 'bold',
+                    background: showGenreEdit ? '#141619ff' : '#f8f9fa',
+                    color: showGenreEdit ? '#ffffff' : '#5f6368',
+                    border: '1px solid ' + (showGenreEdit ? '#141619ff' : '#dadce0'),
+                    borderRadius: 4,
+                    width: 36,
+                    height: 36,
+                    fontSize: 18,
+                    fontWeight: '500',
                     marginLeft: 8,
                     cursor: 'pointer',
                     display: 'flex',
@@ -228,7 +298,7 @@ export default function App() {
                     transition: 'all 0.2s'
                   }}
                   title={showGenreEdit ? 'ジャンル追加・削除欄を隠す' : 'ジャンル追加・削除欄を表示'}
-                >＋</button>
+                >+</button>
               </div>
               {showGenreEdit && (
                 <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
@@ -237,35 +307,149 @@ export default function App() {
                     value={newGenre}
                     onChange={e => setNewGenre(e.target.value)}
                     placeholder="ジャンル名を入力"
-                    style={{ width: 120, padding: '6px 8px', borderRadius: 4, border: '1px solid #ccc', fontSize: 15 }}
+                    style={{ 
+                      width: 120, 
+                      padding: '8px 12px', 
+                      borderRadius: 4, 
+                      border: '1px solid #dadce0', 
+                      fontSize: 14,
+                      fontFamily: 'Roboto, Arial, sans-serif',
+                      outline: 'none'
+                    }}
                   />
                   <button
                     type="button"
                     onClick={() => {
                       const val = newGenre.trim();
                       if (val && !genres.includes(val)) {
-                        setGenres([...genres, val]);
+                        const newGenres = [...genres, val];
+                        setGenres(newGenres);
                         setNewGenre('');
                       }
                     }}
-                    style={{ padding: '6px 16px', borderRadius: 4, background: '#1976d2', color: '#fff', border: 'none', fontWeight: 'bold', fontSize: 15, cursor: 'pointer' }}
+                    style={{ 
+                      padding: '8px 16px', 
+                      borderRadius: 4, 
+                      background: '#141619ff', 
+                      color: '#ffffff', 
+                      border: 'none', 
+                      fontWeight: '500', 
+                      fontSize: 14, 
+                      cursor: 'pointer',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
                   >追加</button>
                   <button
                     type="button"
                     onClick={() => {
                       const val = newGenre.trim();
                       if (val && genres.includes(val) && genres.length > 1) {
-                        setGenres(genres.filter(x => x !== val));
-                        if (genre === val) setGenre(genres.filter(x => x !== val)[0] || '');
+                        const newGenres = genres.filter(x => x !== val);
+                        setGenres(newGenres);
+                        if (genre === val) setGenre(newGenres[0] || '');
                         setNewGenre('');
                       }
                     }}
-                    style={{ padding: '6px 16px', borderRadius: 4, background: '#e53935', color: '#fff', border: 'none', fontWeight: 'bold', fontSize: 15, cursor: 'pointer' }}
+                    style={{ 
+                      padding: '8px 16px', 
+                      borderRadius: 4, 
+                      background: '#141619ff', 
+                      color: '#ffffff', 
+                      border: 'none', 
+                      fontWeight: '500', 
+                      fontSize: 14, 
+                      cursor: 'pointer',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
                   >削除</button>
                 </div>
               )}
             </div>
-            <div style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', marginBottom: 20, alignItems: 'flex-end', gap: 16 }}>
+              <div style={{ flex: 1, maxWidth: 140 }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: 6, 
+                  fontWeight: '500', 
+                  fontSize: 14,
+                  color: '#202124',
+                  fontFamily: 'Roboto, Arial, sans-serif'
+                }}>日付</label>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={date => setSelectedDate(date)}
+                  dateFormat="yyyy/MM/dd"
+                  locale="ja"
+                  placeholderText="日付を選択してください"
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  popperClassName="datepicker-popper"
+                  popperProps={{
+                    style: {
+                      zIndex: 10000
+                    }
+                  }}
+                  popperModifiers={[
+                    {
+                      name: 'preventOverflow',
+                      options: {
+                        rootBoundary: 'viewport',
+                        tether: false,
+                        altAxis: true,
+                      },
+                    },
+                  ]}
+                  customInput={
+                    <input
+                      style={{
+                        width: 120,
+                        minWidth: 100,
+                        padding: '8px 12px',
+                        border: '1px solid #dadce0',
+                        borderRadius: 4,
+                        fontSize: 14,
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        fontFamily: 'Roboto, Arial, sans-serif',
+                        outline: 'none'
+                      }}
+                    />
+                  }
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: 6, 
+                  fontWeight: '500', 
+                  fontSize: 14,
+                  color: '#202124',
+                  fontFamily: 'Roboto, Arial, sans-serif'
+                }}>金額</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      border: '1px solid #dadce0',
+                      borderRadius: 4,
+                      fontSize: 14,
+                      fontFamily: 'Roboto, Arial, sans-serif',
+                      outline: 'none'
+                    }}
+                    placeholder="金額"
+                    required
+                    min={1}
+                  />
+                  <span style={{ fontSize: 14, color: '#5f6368', fontFamily: 'Roboto, Arial, sans-serif' }}>円</span>
+                </div>
+              </div>
+            </div>
+            {/* <div style={{ marginBottom: 20 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>金額:</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input
@@ -285,23 +469,24 @@ export default function App() {
                 />
                 <span style={{ fontSize: 16, color: '#666' }}>円</span>
               </div>
-            </div>
+            </div> */}
             <button
               type="submit"
               style={{
                 width: '100%',
-                padding: 12,
-                background: '#1976d2',
-                color: '#fff',
+                padding: '12px 24px',
+                background: '#141619ff',
+                color: '#ffffff',
                 border: 'none',
-                borderRadius: 6,
-                fontSize: 16,
+                borderRadius: 4,
+                fontSize: 14,
                 cursor: 'pointer',
-                fontWeight: 'bold',
-                transition: 'background-color 0.2s'
+                fontWeight: '500',
+                transition: 'background-color 0.2s',
+                fontFamily: 'Roboto, Arial, sans-serif'
               }}
-              onMouseOver={e => e.target.style.backgroundColor = '#1565c0'}
-              onMouseOut={e => e.target.style.backgroundColor = '#1976d2'}
+              onMouseOver={e => e.target.style.backgroundColor = '#0f1115'}
+              onMouseOut={e => e.target.style.backgroundColor = '#141619ff'}
             >
               登録
             </button>
@@ -310,7 +495,7 @@ export default function App() {
           {/* 支出一覧テーブル（入力欄の下に表示） */}
           {expenses.length > 0 && (
             <div style={{ marginTop: 30, marginBottom: 0, maxHeight: 320, overflowY: 'auto', background: '#fafafa', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-              <h3 style={{ fontSize: 18, marginBottom: 10, position: 'sticky', top: 0, background: '#fafafa', zIndex: 1 }}>支出一覧</h3>
+              <h3 style={{ fontSize: 18, marginBottom: 10, position: 'sticky', top: 0, background: '#fafafa', zIndex: 0 }}>支出一覧</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
                 <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)} style={{ fontSize: 15, padding: '4px 8px', borderRadius: 4 }}>
                   {allYears.map(y => <option key={y} value={y}>{y}年</option>)}
@@ -328,7 +513,7 @@ export default function App() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
+                          background: selectedMonth === m.toString().padStart(2, '0') ? '#141619ff' : '#eee',
                           color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
                           border: 'none',
                           borderRadius: 4,
@@ -351,7 +536,7 @@ export default function App() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
+                          background: selectedMonth === m.toString().padStart(2, '0') ? '#141619ff' : '#eee',
                           color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
                           border: 'none',
                           borderRadius: 4,
@@ -385,7 +570,7 @@ export default function App() {
                           <button
                             onClick={() => handleDelete(exp.id)}
                             style={{
-                              background: '#e53935',
+                              background: '#141619ff',
                               color: '#fff',
                               border: 'none',
                               borderRadius: 4,
@@ -408,11 +593,47 @@ export default function App() {
           )}
         </div>
         {/* グラフエリア（2つの棒グラフのみ表示） */}
-  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
-          {/* <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出分析</h2> */}
+  <div style={{ 
+    border: '1px solid #e8eaed', 
+    borderRadius: 8, 
+    padding: isMobile ? 16 : 20, 
+    minHeight: isMobile ? 400 : 600, 
+    background: '#ffffff', 
+    boxSizing: 'border-box', 
+    width: '100%', 
+    overflowX: 'auto',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+  }}>
+      <h2 style={{ 
+        marginTop: 0, 
+        marginBottom: 24, 
+        color: '#202124', 
+        fontSize: 18, 
+        fontWeight: '500',
+        textAlign: 'left',
+        fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+        borderBottom: '1px solid #e8eaed', 
+        paddingBottom: 12 
+      }}>支出分析</h2>
           {/* 今年の月別ジャンル別支出グラフ */}
-          <div style={{ marginBottom: 40 }}>
-            <h3 style={{ marginBottom: 15, fontSize: 18 }}>月別支出</h3>
+          <div style={{ 
+            marginBottom: 32,
+            padding: 16,
+            background: '#f8f9fa',
+            borderRadius: 8,
+            border: '1px solid #e8eaed'
+          }}>
+            <h3 style={{ 
+              marginBottom: 16, 
+              fontSize: 16, 
+              color: '#202124',
+              fontWeight: '500',
+              textAlign: 'left',
+              fontFamily: 'Roboto, Arial, sans-serif',
+              margin: '0 0 16px 0'
+            }}>
+              {currentYear}年
+            </h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={monthlyGenreArray}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -427,8 +648,23 @@ export default function App() {
             </ResponsiveContainer>
           </div>
           {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
-          <div>
-            <h3 style={{ marginBottom: 15, fontSize: 18 }}>日別支出</h3>
+          <div style={{ 
+            padding: 16,
+            background: '#f8f9fa',
+            borderRadius: 8,
+            border: '1px solid #e8eaed'
+          }}>
+            <h3 style={{ 
+              marginBottom: 16, 
+              fontSize: 16, 
+              color: '#202124',
+              fontWeight: '500',
+              textAlign: 'left',
+              fontFamily: 'Roboto, Arial, sans-serif',
+              margin: '0 0 16px 0'
+            }}>
+              {currentMonth}月
+            </h3>
             <ResponsiveContainer width="100%" height={isMobile ? 600 : 250}>
               {isMobile ? (
                 <BarChart data={dailyGenreArray} layout="vertical">
@@ -455,6 +691,8 @@ export default function App() {
               )}
             </ResponsiveContainer>
           </div>
+        </div>
+        </div>
         </div>
       </div>
     </div>
