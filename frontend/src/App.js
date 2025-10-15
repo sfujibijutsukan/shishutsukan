@@ -662,7 +662,7 @@ export default function App() {
             }}>
               {currentYear}年の支出 (月別)
             </h3>
-            <ResponsiveContainer width="100%" height={265}>
+            <ResponsiveContainer width={isMobile ? "100vw" : "100%"} height={265}>
               <BarChart 
                 data={monthlyGenreArray}
                 margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
