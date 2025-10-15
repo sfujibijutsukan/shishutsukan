@@ -298,7 +298,7 @@ export default function App() {
                     transition: 'all 0.2s'
                   }}
                   title={showGenreEdit ? 'ジャンル追加・削除欄を隠す' : 'ジャンル追加・削除欄を表示'}
-                >+</button>
+                >＋</button>
               </div>
               {showGenreEdit && (
                 <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
@@ -330,14 +330,17 @@ export default function App() {
                     style={{ 
                       padding: '8px 16px', 
                       borderRadius: 4, 
-                      background: '#141619ff', 
+                      background: '#9aa0a6', 
                       color: '#ffffff', 
                       border: 'none', 
                       fontWeight: '500', 
                       fontSize: 14, 
                       cursor: 'pointer',
-                      fontFamily: 'Roboto, Arial, sans-serif'
+                      fontFamily: 'Roboto, Arial, sans-serif',
+                      transition: 'background-color 0.2s'
                     }}
+                    onMouseOver={e => e.target.style.backgroundColor = '#141619ff'}
+                    onMouseOut={e => e.target.style.backgroundColor = '#9aa0a6'}
                   >追加</button>
                   <button
                     type="button"
@@ -353,14 +356,17 @@ export default function App() {
                     style={{ 
                       padding: '8px 16px', 
                       borderRadius: 4, 
-                      background: '#141619ff', 
+                      background: '#9aa0a6', 
                       color: '#ffffff', 
                       border: 'none', 
                       fontWeight: '500', 
                       fontSize: 14, 
                       cursor: 'pointer',
-                      fontFamily: 'Roboto, Arial, sans-serif'
+                      fontFamily: 'Roboto, Arial, sans-serif',
+                      transition: 'background-color 0.2s'
                     }}
+                    onMouseOver={e => e.target.style.backgroundColor = '#141619ff'}
+                    onMouseOut={e => e.target.style.backgroundColor = '#9aa0a6'}
                   >削除</button>
                 </div>
               )}
@@ -570,14 +576,17 @@ export default function App() {
                           <button
                             onClick={() => handleDelete(exp.id)}
                             style={{
-                              background: '#141619ff',
+                              background: '#9aa0a6',
                               color: '#fff',
                               border: 'none',
                               borderRadius: 4,
                               padding: '4px 12px',
                               cursor: 'pointer',
-                              fontSize: 14
+                              fontSize: 14,
+                              transition: 'background-color 0.2s'
                             }}
+                            onMouseOver={e => e.target.style.backgroundColor = '#141619ff'}
+                            onMouseOut={e => e.target.style.backgroundColor = '#9aa0a6'}
                           >削除</button>
                         </td>
                       </tr>
