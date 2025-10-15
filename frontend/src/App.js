@@ -650,9 +650,10 @@ export default function App() {
                 barCategoryGap="15%"
               >
                 <CartesianGrid 
-                  strokeDasharray="2 2" 
-                  stroke="#e8eaed" 
-                  vertical={false} 
+                  strokeDasharray="3 3" 
+                  stroke="#dadce0" 
+                  horizontal={true}
+                  vertical={true}
                 />
                 <XAxis 
                   dataKey="month" 
@@ -729,9 +730,10 @@ export default function App() {
                   barCategoryGap="15%"
                 >
                   <CartesianGrid 
-                    strokeDasharray="2 2" 
-                    stroke="#e8eaed" 
-                    horizontal={false} 
+                    strokeDasharray="3 3" 
+                    stroke="#dadce0" 
+                    horizontal={true}
+                    vertical={true}
                   />
                   <YAxis 
                     type="category" 
@@ -789,9 +791,10 @@ export default function App() {
                   barCategoryGap="15%"
                 >
                   <CartesianGrid 
-                    strokeDasharray="2 2" 
-                    stroke="#e8eaed" 
-                    vertical={false} 
+                    strokeDasharray="3 3" 
+                    stroke="#dadce0" 
+                    horizontal={true}
+                    vertical={true}
                   />
                   <XAxis 
                     dataKey="day" 
