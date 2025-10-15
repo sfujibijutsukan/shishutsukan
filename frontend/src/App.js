@@ -519,7 +519,7 @@ export default function App() {
 
           {/* 支出一覧テーブル（入力欄の下に表示） */}
           {expenses.length > 0 && (
-            <div style={{ marginTop: 30, marginBottom: 0, maxHeight: 320, overflowY: 'auto', background: '#fafafa', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ marginTop: 30, marginBottom: 0, maxHeight: 360, overflowY: 'auto', background: '#fafafa', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
               <h3 style={{ fontSize: 18, marginBottom: 10, position: 'sticky', top: 0, background: '#fafafa', zIndex: 0 }}>支出一覧</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
                 <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)} style={{ fontSize: 15, padding: '4px 8px', borderRadius: 4 }}>
@@ -642,7 +642,7 @@ export default function App() {
         fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
         borderBottom: '1px solid #e8eaed', 
         paddingBottom: 12 
-      }}>支出分析</h2>
+      }}>支出グラフ</h2>
           {/* 今年の月別ジャンル別支出グラフ */}
           <div style={{ 
             marginBottom: 32,
