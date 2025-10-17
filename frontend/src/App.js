@@ -75,11 +75,10 @@ export default function App() {
   }, []);
   // 凡例をカスタムレンダリングするコンポーネント(フォント色を黒に変更・レスポンシブ対応)
   const renderLegend = (props) => {
-    const isMobileForLegend = typeof window !== 'undefined' && window.innerWidth <= 600;
     return (
       <ul style={{ 
         color: '#000', 
-        fontSize: isMobileForLegend ? '10px' : '12px', 
+        fontSize: isMobile ? '10px' : '12px', 
         fontFamily: 'Roboto, Arial, sans-serif', 
         margin: 0, 
         padding: 0, 
@@ -87,18 +86,18 @@ export default function App() {
         display: 'flex', 
         flexWrap: 'wrap', 
         justifyContent: 'center',
-        gap: isMobileForLegend ? '8px' : '16px'
+        gap: isMobile ? '8px' : '16px'
       }}>
         {props.payload.map((entry, index) => (
           <li key={`item-${index}`} style={{ 
             display: 'flex', 
             alignItems: 'center',
-            marginBottom: isMobileForLegend ? '4px' : '0'
+            marginBottom: isMobile ? '4px' : '0'
           }}>
             <span style={{
               display: 'inline-block',
-              width: isMobileForLegend ? 10 : 12,
-              height: isMobileForLegend ? 10 : 12,
+              width: isMobile ? 10 : 12,
+              height: isMobile ? 10 : 12,
               backgroundColor: entry.color,
               marginRight: 4,
               borderRadius: 2,
@@ -268,8 +267,26 @@ export default function App() {
     return y === selectedYear && m === selectedMonth;
   });
 
-  // レスポンシブ対応: 画面幅でレイアウト切替
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
+  // レスポンシブ対応: 画面幅でレイアウト切替（動的検知）
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      // 初期値を設定
+      handleResize();
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, []);
   return (
     <div style={{ 
       minHeight: '100vh',
@@ -278,7 +295,7 @@ export default function App() {
       overflowX: 'hidden'
     }}>
       <div style={{ 
-        maxWidth: 1200, 
+        maxWidth: isMobile ? '100%' : 1200, 
         margin: '0 auto', 
         padding: 0,
         background: '#ffffff',
