@@ -1,4 +1,57 @@
 import React, { useState, useEffect } from 'react';
+// ゴミ箱アイコン用CSS
+const trashBtnStyle = `
+.trash-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.trash-icon {
+  color: #202124;
+  transition: color 0.2s;
+}
+.trash-btn:hover .trash-icon {
+  color: #ea4335;
+}
+.trash-label {
+  color: #202124;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+.trash-btn:hover .trash-label {
+  color: #ea4335;
+}
+ .add-btn {
+   background: transparent;
+   border: none !important;
+   cursor: pointer;
+   padding: 4px;
+   border-radius: 4px;
+   transition: background 0.2s;
+ }
+ .add-icon {
+   color: #202124;
+   transition: color 0.2s;
+ }
+ .add-btn:hover .add-icon {
+   color: #34a853;
+ }
+.add-label {
+  color: #202124;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+.add-btn:hover .add-label {
+  color: #34a853;
+}
+`;
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ja } from 'date-fns/locale';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -11,6 +64,15 @@ const DEFAULT_GENRES = ['食費', '交通費', '消耗品', 'サブスク', '特
 const COLORS = ['#4163adff', '#875095ff', '#ea4335', '#dd5bbeff', '#fbbc04', '#34a853', '#1a73e8', '#137333', '#f9ab00', '#d93025'];
 
 export default function App() {
+  // ゴミ箱アイコン用CSSをheadに追加
+  useEffect(() => {
+    if (!document.getElementById('trash-btn-style')) {
+      const style = document.createElement('style');
+      style.id = 'trash-btn-style';
+      style.innerHTML = trashBtnStyle;
+      document.head.appendChild(style);
+    }
+  }, []);
   // 凡例をカスタムレンダリングするコンポーネント(フォント色を黒に変更・中央寄せ)
   const renderLegend = (props) => (
     <ul style={{ color: '#000', fontSize: '12px', fontFamily: 'Roboto, Arial, sans-serif', margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -346,21 +408,24 @@ export default function App() {
                         setNewGenre('');
                       }
                     }}
-                    style={{ 
-                      padding: '8px 16px', 
-                      borderRadius: 4, 
-                      background: '#9aa0a6', 
-                      color: '#ffffff', 
-                      border: 'none', 
-                      fontWeight: '500', 
-                      fontSize: 14, 
-                      cursor: 'pointer',
-                      fontFamily: 'Roboto, Arial, sans-serif',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseOver={e => e.target.style.backgroundColor = '#141619ff'}
-                    onMouseOut={e => e.target.style.backgroundColor = '#9aa0a6'}
-                  >追加</button>
+                    className="add-btn"
+                    title="ジャンル追加"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20" height="20" viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="add-icon"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span className="add-label">追加</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -372,21 +437,26 @@ export default function App() {
                         setNewGenre('');
                       }
                     }}
-                    style={{ 
-                      padding: '8px 16px', 
-                      borderRadius: 4, 
-                      background: '#9aa0a6', 
-                      color: '#ffffff', 
-                      border: 'none', 
-                      fontWeight: '500', 
-                      fontSize: 14, 
-                      cursor: 'pointer',
-                      fontFamily: 'Roboto, Arial, sans-serif',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseOver={e => e.target.style.backgroundColor = '#141619ff'}
-                    onMouseOut={e => e.target.style.backgroundColor = '#9aa0a6'}
-                  >削除</button>
+                    className="trash-btn"
+                    title="ジャンル削除"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20" height="20" viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="trash-icon"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                    <span className="trash-label">削除</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -474,27 +544,6 @@ export default function App() {
                 </div>
               </div>
             </div>
-            {/* <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>金額:</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #ccc',
-                    borderRadius: 4,
-                    fontSize: 16
-                  }}
-                  placeholder="金額を入力"
-                  required
-                  min={1}
-                />
-                <span style={{ fontSize: 16, color: '#666' }}>円</span>
-              </div>
-            </div> */}
             <button
               type="submit"
               style={{
@@ -588,25 +637,31 @@ export default function App() {
                   <tbody>
                     {filteredExpenses.length > 0 ? filteredExpenses.map((exp, idx) => (
                       <tr key={exp.id}>
-                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{exp.date}</td>
-                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{exp.genre}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' ,textAlign: 'center'}}>{exp.date}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' ,textAlign: 'center'}}>{exp.genre}</td>
                         <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'right' }}>{exp.amount.toLocaleString()}円</td>
                         <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
                           <button
                             onClick={() => handleDelete(exp.id)}
-                            style={{
-                              background: '#9aa0a6',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: 4,
-                              padding: '4px 12px',
-                              cursor: 'pointer',
-                              fontSize: 14,
-                              transition: 'background-color 0.2s'
-                            }}
-                            onMouseOver={e => e.target.style.backgroundColor = '#141619ff'}
-                            onMouseOut={e => e.target.style.backgroundColor = '#9aa0a6'}
-                          >削除</button>
+                            className="trash-btn"
+                            title="削除"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20" height="20" viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="trash-icon"
+                            >
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                              <line x1="10" y1="11" x2="10" y2="17" />
+                              <line x1="14" y1="11" x2="14" y2="17" />
+                            </svg>
+                          </button>
                         </td>
                       </tr>
                     )) : (
