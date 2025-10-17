@@ -78,7 +78,7 @@ export default function App() {
     return (
       <ul style={{ 
         color: '#000', 
-        fontSize: isMobile ? '10px' : '12px', 
+        fontSize: isMobile ? '12px' : '14px', 
         fontFamily: 'Roboto, Arial, sans-serif', 
         margin: 0, 
         padding: 0, 
@@ -785,7 +785,7 @@ export default function App() {
                     width={40}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fill: '#5f6368' }}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
                   />
                   <XAxis 
                     type="number"
@@ -794,7 +794,7 @@ export default function App() {
                     allowDecimals={false}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fill: '#5f6368' }}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
                   />
                   <Tooltip 
                     formatter={value => [`${value.toLocaleString()}円`, '']}
@@ -804,7 +804,7 @@ export default function App() {
                       border: '1px solid #e8eaed',
                       borderRadius: '8px',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      fontSize: '12px',
+                      fontSize: '14px',
                       fontFamily: 'Roboto, Arial, sans-serif'
                     }}
                   />
@@ -845,7 +845,7 @@ export default function App() {
                     tickFormatter={m => `${parseInt(m, 10)}月`}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: '#5f6368' }}
+                    tick={{ fontSize: 14, fill: '#5f6368' }}
                   />
                   <YAxis 
                     tickFormatter={value => `${value.toLocaleString()}円`} 
@@ -854,7 +854,7 @@ export default function App() {
                     width={isMobile ? 90 : 80}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: '#5f6368' }}
+                    tick={{ fontSize: 14, fill: '#5f6368' }}
                   />
                   <Tooltip 
                     formatter={value => [`${value.toLocaleString()}円`, '']}
@@ -928,7 +928,7 @@ export default function App() {
                     width={45}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fill: '#5f6368' }}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
                   />
                   <XAxis 
                     type="number" 
@@ -937,7 +937,7 @@ export default function App() {
                     allowDecimals={false}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fill: '#5f6368' }}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
                   />
                   <Tooltip 
                     formatter={value => [`${value.toLocaleString()}円`, '']}
@@ -947,7 +947,7 @@ export default function App() {
                       border: '1px solid #e8eaed',
                       borderRadius: '8px',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      fontSize: '12px',
+                      fontSize: '14px',
                       fontFamily: 'Roboto, Arial, sans-serif'
                     }}
                   />
@@ -984,7 +984,7 @@ export default function App() {
                     interval={0}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: '#5f6368' }}
+                    tick={{ fontSize: 13, fill: '#5f6368' }}
                   />
                   <YAxis 
                     tickFormatter={value => `${value.toLocaleString()}円`} 
@@ -993,7 +993,7 @@ export default function App() {
                     width={80}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: '#5f6368' }}
+                    tick={{ fontSize: 13, fill: '#5f6368' }}
                   />
                   <Tooltip 
                     formatter={value => [`${value.toLocaleString()}円`, '']}
