@@ -721,7 +721,7 @@ export default function App() {
       }}>支出グラフ</h2>
           {/* 今年の月別ジャンル別支出グラフ */}
           <div style={{ 
-            marginBottom: 32,
+            marginBottom: 10,
             padding: isMobile ? 12 : 16,
             background: '#f8f9fa',
             borderRadius: 8,
@@ -747,10 +747,10 @@ export default function App() {
                   data={monthlyGenreArray}
                   layout="vertical"
                   margin={{ 
-                    top: 20, 
-                    right: 16, 
-                    left: 50, 
-                    bottom: 20 
+                    top: 0, 
+                    right: 10, 
+                    left: 10, 
+                    bottom: 10 
                   }}
                   barCategoryGap="10%"
                 >
@@ -772,7 +772,7 @@ export default function App() {
                   />
                   <XAxis 
                     type="number"
-                    tickFormatter={value => `${Math.round(value / 1000)}k`} 
+                    tickFormatter={value => `${Math.round(value)}円`} 
                     domain={[0, 'dataMax']} 
                     allowDecimals={false}
                     axisLine={false}
@@ -894,7 +894,7 @@ export default function App() {
                 <BarChart 
                   data={dailyGenreArray} 
                   layout="vertical"
-                  margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                  margin={{ top: 0, right: 10, left: 0, bottom: 10 }}
                   barCategoryGap="10%"
                 >
                   <CartesianGrid 
