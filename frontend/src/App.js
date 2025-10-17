@@ -1,4 +1,57 @@
 import React, { useState, useEffect } from 'react';
+// ゴミ箱アイコン用CSS
+const trashBtnStyle = `
+.trash-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.trash-icon {
+  color: #202124;
+  transition: color 0.2s;
+}
+.trash-btn:hover .trash-icon {
+  color: #ea4335;
+}
+.trash-label {
+  color: #202124;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+.trash-btn:hover .trash-label {
+  color: #ea4335;
+}
+ .add-btn {
+   background: transparent;
+   border: none !important;
+   cursor: pointer;
+   padding: 4px;
+   border-radius: 4px;
+   transition: background 0.2s;
+ }
+ .add-icon {
+   color: #202124;
+   transition: color 0.2s;
+ }
+ .add-btn:hover .add-icon {
+   color: #34a853;
+ }
+.add-label {
+  color: #202124;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+.add-btn:hover .add-label {
+  color: #34a853;
+}
+`;
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ja } from 'date-fns/locale';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -8,9 +61,71 @@ import 'react-datepicker/dist/react-datepicker.css';
 registerLocale('ja', ja);
 
 const DEFAULT_GENRES = ['食費', '交通費', '消耗品', 'サブスク', '特別費', 'その他'];
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF90B8', '#FF4560'];
+const COLORS = ['#4163adff', '#875095ff', '#ea4335', '#dd5bbeff', '#fbbc04', '#34a853', '#1a73e8', '#137333', '#f9ab00', '#d93025'];
 
 export default function App() {
+  // ゴミ箱アイコン用CSSをheadに追加
+  useEffect(() => {
+    if (!document.getElementById('trash-btn-style')) {
+      const style = document.createElement('style');
+      style.id = 'trash-btn-style';
+      style.innerHTML = trashBtnStyle;
+      document.head.appendChild(style);
+    }
+  }, []);
+  // 凡例をカスタムレンダリングするコンポーネント(フォント色を黒に変更・レスポンシブ対応)
+  const renderLegend = (props) => {
+    return (
+      <ul style={{ 
+        color: '#000', 
+        fontSize: isMobile ? '12px' : '14px', 
+        fontFamily: 'Roboto, Arial, sans-serif', 
+        margin: 0, 
+        padding: 0, 
+        listStyle: 'none', 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        justifyContent: 'center',
+        gap: isMobile ? '8px' : '16px'
+      }}>
+        {props.payload.map((entry, index) => (
+          <li key={`item-${index}`} style={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            marginBottom: isMobile ? '4px' : '0'
+          }}>
+            <span style={{
+              display: 'inline-block',
+              width: isMobile ? 10 : 12,
+              height: isMobile ? 10 : 12,
+              backgroundColor: entry.color,
+              marginRight: 4,
+              borderRadius: 2,
+              border: '1px solid #ccc'
+            }} />
+            <span style={{ color: '#000' }}>{entry.value}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  // DatePickerのz-indexを確実にするためのスタイル
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .react-datepicker-popper,
+      .datepicker-popper,
+      .react-datepicker {
+        z-index: 10000 !important;
+      }
+      .react-datepicker__portal {
+        z-index: 10000 !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   const [showGenreEdit, setShowGenreEdit] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   // localStorageからジャンルを読み込み、なければデフォルトを使用
@@ -152,23 +267,108 @@ export default function App() {
     return y === selectedYear && m === selectedMonth;
   });
 
-  // レスポンシブ対応: 画面幅でレイアウト切替
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
+  // レスポンシブ対応: 画面幅でレイアウト切替（動的検知）
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth <= 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      // 初期値を設定
+      handleResize();
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, []);
   return (
-    <div style={{ maxWidth: 1200, margin: '20px auto', padding: isMobile ? 8 : 20 }}>
-      <div
-        style={
-          isMobile
-            ? { display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }
-            : { display: 'grid', gridTemplateColumns: '400px 1fr', gap: 30, alignItems: 'start' }
-        }
-      >
+    <div style={{ 
+      minHeight: '100vh',
+      background: '#f8f9fa',
+      padding: isMobile ? 12 : 24,
+      overflowX: 'hidden'
+    }}>
+      <div style={{ 
+        maxWidth: isMobile ? '100%' : 1200, 
+        margin: '0 auto', 
+        padding: 0,
+        background: '#ffffff',
+        borderRadius: 8,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        border: '1px solid #e8eaed',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
+        {/* <div style={{
+          padding: isMobile ? 16 : 24,
+          borderBottom: '1px solid #e8eaed'
+        }}>
+          <h1 style={{ 
+            textAlign: 'left', 
+            color: '#202124', 
+            fontSize: isMobile ? 24 : 28, 
+            fontWeight: '400', 
+            margin: 0,
+            fontFamily: 'Google Sans, Roboto, Arial, sans-serif'
+          }}>
+            支出管理
+          </h1>
+          <p style={{
+            color: '#5f6368',
+            fontSize: 14,
+            margin: '4px 0 0 0',
+            fontFamily: 'Roboto, Arial, sans-serif'
+          }}>
+            家計の支出を記録・分析できます
+          </p>
+        </div> */}
+        <div style={{ padding: isMobile ? 16 : 24 }}>
+        <div
+          style={
+            isMobile
+              ? { display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'stretch' }
+              : { display: 'grid', gridTemplateColumns: '420px 1fr', gap: 30, alignItems: 'start' }
+          }
+        >
         {/* 支出入力フォーム＋支出一覧 */}
-  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
-          {/* <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出入力</h2> */}
+  <div style={{ 
+    border: '1px solid #e8eaed', 
+    borderRadius: 8, 
+    padding: isMobile ? 16 : 20, 
+    minHeight: isMobile ? 400 : 600, 
+    background: '#ffffff', 
+    boxSizing: 'border-box', 
+    width: '100%', 
+    overflowX: 'auto', 
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' 
+  }}>
+          <h2 style={{ 
+            marginTop: 0, 
+            marginBottom: 20, 
+            color: '#202124', 
+            fontSize: 18, 
+            fontWeight: '500', 
+            textAlign: 'left',
+            fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+            borderBottom: '1px solid #e8eaed', 
+            paddingBottom: 12 
+          }}>支出入力</h2>
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold', fontSize: 15 }}>ジャンル</label>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: 8, 
+                fontWeight: '500', 
+                fontSize: 14,
+                color: '#202124',
+                fontFamily: 'Roboto, Arial, sans-serif'
+              }}>ジャンル</label>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
                 {genres.map(g => (
                   <button
@@ -176,21 +376,22 @@ export default function App() {
                     key={g}
                     onClick={() => setGenre(g)}
                     style={{
-                      background: genre === g ? '#1976d2' : '#f5f5f5',
-                      color: genre === g ? '#fff' : '#333',
-                      border: '1px solid ' + (genre === g ? '#1976d2' : '#ddd'),
-                      borderRadius: 6,
+                      background: genre === g ? '#141619ff' : '#f8f9fa',
+                      color: genre === g ? '#ffffff' : '#5f6368',
+                      border: '1px solid ' + (genre === g ? '#141619ff' : '#dadce0'),
+                      borderRadius: 4,
                       width: 100,
-                      height: 40,
+                      height: 36,
                       padding: 0,
                       margin: 0,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer',
-                      fontSize: 16,
-                      fontWeight: 'bold',
-                      transition: 'all 0.2s'
+                      fontSize: 14,
+                      fontWeight: '500',
+                      transition: 'all 0.2s',
+                      fontFamily: 'Roboto, Arial, sans-serif'
                     }}
                   >
                     {g}
@@ -200,14 +401,14 @@ export default function App() {
                   type="button"
                   onClick={() => setShowGenreEdit(v => !v)}
                   style={{
-                    background: showGenreEdit ? '#1976d2' : '#f5f5f5',
-                    color: showGenreEdit ? '#fff' : '#333',
-                    border: '1px solid ' + (showGenreEdit ? '#1976d2' : '#ddd'),
-                    borderRadius: '50%',
-                    width: 40,
-                    height: 40,
-                    fontSize: 24,
-                    fontWeight: 'bold',
+                    background: showGenreEdit ? '#141619ff' : '#f8f9fa',
+                    color: showGenreEdit ? '#ffffff' : '#5f6368',
+                    border: '1px solid ' + (showGenreEdit ? '#141619ff' : '#dadce0'),
+                    borderRadius: 4,
+                    width: 36,
+                    height: 36,
+                    fontSize: 18,
+                    fontWeight: '500',
                     marginLeft: 8,
                     cursor: 'pointer',
                     display: 'flex',
@@ -216,7 +417,7 @@ export default function App() {
                     transition: 'all 0.2s'
                   }}
                   title={showGenreEdit ? 'ジャンル追加・削除欄を隠す' : 'ジャンル追加・削除欄を表示'}
-                >+</button>
+                >＋</button>
               </div>
               {showGenreEdit && (
                 <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
@@ -225,7 +426,15 @@ export default function App() {
                     value={newGenre}
                     onChange={e => setNewGenre(e.target.value)}
                     placeholder="ジャンル名を入力"
-                    style={{ width: 120, padding: '6px 8px', borderRadius: 4, border: '1px solid #ccc', fontSize: 15 }}
+                    style={{ 
+                      width: 120, 
+                      padding: '8px 12px', 
+                      borderRadius: 4, 
+                      border: '1px solid #dadce0', 
+                      fontSize: 14,
+                      fontFamily: 'Roboto, Arial, sans-serif',
+                      outline: 'none'
+                    }}
                   />
                   <button
                     type="button"
@@ -237,8 +446,24 @@ export default function App() {
                         setNewGenre('');
                       }
                     }}
-                    style={{ padding: '6px 16px', borderRadius: 4, background: '#1976d2', color: '#fff', border: 'none', fontWeight: 'bold', fontSize: 15, cursor: 'pointer' }}
-                  >追加</button>
+                    className="add-btn"
+                    title="ジャンル追加"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20" height="20" viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="add-icon"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span className="add-label">追加</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -250,14 +475,39 @@ export default function App() {
                         setNewGenre('');
                       }
                     }}
-                    style={{ padding: '6px 16px', borderRadius: 4, background: '#e53935', color: '#fff', border: 'none', fontWeight: 'bold', fontSize: 15, cursor: 'pointer' }}
-                  >削除</button>
+                    className="trash-btn"
+                    title="ジャンル削除"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20" height="20" viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="trash-icon"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                    <span className="trash-label">削除</span>
+                  </button>
                 </div>
               )}
             </div>
-            <div style={{ display: 'flex', marginBottom: 14, alignItems: 'flex-end' }}>
-              <div style={{ flex: 1, maxWidth: 120 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontWeight: 'bold', fontSize: 15 }}>日付</label>
+            <div style={{ display: 'flex', marginBottom: 20, alignItems: 'flex-end', gap: 16 }}>
+              <div style={{ flex: 1, maxWidth: 140 }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: 6, 
+                  fontWeight: '500', 
+                  fontSize: 14,
+                  color: '#202124',
+                  fontFamily: 'Roboto, Arial, sans-serif'
+                }}>日付</label>
                 <DatePicker
                   selected={selectedDate}
                   onChange={date => setSelectedDate(date)}
@@ -267,81 +517,88 @@ export default function App() {
                   showMonthDropdown
                   showYearDropdown
                   dropdownMode="select"
+                  popperClassName="datepicker-popper"
+                  popperProps={{
+                    style: {
+                      zIndex: 10000
+                    }
+                  }}
+                  popperModifiers={[
+                    {
+                      name: 'preventOverflow',
+                      options: {
+                        rootBoundary: 'viewport',
+                        tether: false,
+                        altAxis: true,
+                      },
+                    },
+                  ]}
                   customInput={
                     <input
                       style={{
-                        width: 100,
-                        minWidth: 80,
-                        padding: '10px 0px',
-                        border: '1px solid #ccc',
+                        width: 120,
+                        minWidth: 100,
+                        padding: '8px 12px',
+                        border: '1px solid #dadce0',
                         borderRadius: 4,
-                        fontSize: 15,
+                        fontSize: 14,
                         textAlign: 'center',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontFamily: 'Roboto, Arial, sans-serif',
+                        outline: 'none'
                       }}
                     />
                   }
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontWeight: 'bold', fontSize: 15 }}>金額</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: 6, 
+                  fontWeight: '500', 
+                  fontSize: 14,
+                  color: '#202124',
+                  fontFamily: 'Roboto, Arial, sans-serif'
+                }}>金額</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <input
                     type="number"
                     value={amount}
                     onChange={e => setAmount(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '10px 10px',
-                      border: '1px solid #ccc',
+                      padding: '8px 12px',
+                      border: '1px solid #dadce0',
                       borderRadius: 4,
-                      fontSize: 15
+                      fontSize: 14,
+                      fontFamily: 'Roboto, Arial, sans-serif',
+                      outline: 'none'
                     }}
                     placeholder="金額"
                     required
                     min={1}
                   />
-                  <span style={{ fontSize: 15, color: '#666' }}>円</span>
+                  <span style={{ fontSize: 14, color: '#5f6368', fontFamily: 'Roboto, Arial, sans-serif' }}>円</span>
                 </div>
               </div>
             </div>
-            {/* <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>金額:</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #ccc',
-                    borderRadius: 4,
-                    fontSize: 16
-                  }}
-                  placeholder="金額を入力"
-                  required
-                  min={1}
-                />
-                <span style={{ fontSize: 16, color: '#666' }}>円</span>
-              </div>
-            </div> */}
             <button
               type="submit"
               style={{
                 width: '100%',
-                padding: 12,
-                background: '#1976d2',
-                color: '#fff',
+                padding: '12px 24px',
+                background: '#141619ff',
+                color: '#ffffff',
                 border: 'none',
-                borderRadius: 6,
-                fontSize: 16,
+                borderRadius: 4,
+                fontSize: 14,
                 cursor: 'pointer',
-                fontWeight: 'bold',
-                transition: 'background-color 0.2s'
+                fontWeight: '500',
+                transition: 'background-color 0.2s',
+                fontFamily: 'Roboto, Arial, sans-serif'
               }}
-              onMouseOver={e => e.target.style.backgroundColor = '#1565c0'}
-              onMouseOut={e => e.target.style.backgroundColor = '#1976d2'}
+              onMouseOver={e => e.target.style.backgroundColor = '#0f1115'}
+              onMouseOut={e => e.target.style.backgroundColor = '#141619ff'}
             >
               登録
             </button>
@@ -349,8 +606,8 @@ export default function App() {
 
           {/* 支出一覧テーブル（入力欄の下に表示） */}
           {expenses.length > 0 && (
-            <div style={{ marginTop: 30, marginBottom: 0, maxHeight: 320, overflowY: 'auto', background: '#fafafa', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-              <h3 style={{ fontSize: 18, marginBottom: 10, position: 'sticky', top: 0, background: '#fafafa', zIndex: 1 }}>支出一覧</h3>
+            <div style={{ marginTop: 30, marginBottom: 0, maxHeight: 437, overflowY: 'auto', background: '#fafafa', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+              <h3 style={{ fontSize: 18, marginBottom: 10, position: 'sticky', top: 0, background: '#fafafa', zIndex: 0 }}>支出一覧</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
                 <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)} style={{ fontSize: 15, padding: '4px 8px', borderRadius: 4 }}>
                   {allYears.map(y => <option key={y} value={y}>{y}年</option>)}
@@ -368,7 +625,7 @@ export default function App() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
+                          background: selectedMonth === m.toString().padStart(2, '0') ? '#141619ff' : '#eee',
                           color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
                           border: 'none',
                           borderRadius: 4,
@@ -391,7 +648,7 @@ export default function App() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: selectedMonth === m.toString().padStart(2, '0') ? '#1976d2' : '#eee',
+                          background: selectedMonth === m.toString().padStart(2, '0') ? '#141619ff' : '#eee',
                           color: selectedMonth === m.toString().padStart(2, '0') ? '#fff' : '#333',
                           border: 'none',
                           borderRadius: 4,
@@ -418,22 +675,31 @@ export default function App() {
                   <tbody>
                     {filteredExpenses.length > 0 ? filteredExpenses.map((exp, idx) => (
                       <tr key={exp.id}>
-                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{exp.date}</td>
-                        <td style={{ padding: '8px', border: '1px solid #ddd' }}>{exp.genre}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' ,textAlign: 'center'}}>{exp.date}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ddd' ,textAlign: 'center'}}>{exp.genre}</td>
                         <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'right' }}>{exp.amount.toLocaleString()}円</td>
                         <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
                           <button
                             onClick={() => handleDelete(exp.id)}
-                            style={{
-                              background: '#e53935',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: 4,
-                              padding: '4px 12px',
-                              cursor: 'pointer',
-                              fontSize: 14
-                            }}
-                          >削除</button>
+                            className="trash-btn"
+                            title="削除"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20" height="20" viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="trash-icon"
+                            >
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                              <line x1="10" y1="11" x2="10" y2="17" />
+                              <line x1="14" y1="11" x2="14" y2="17" />
+                            </svg>
+                          </button>
                         </td>
                       </tr>
                     )) : (
@@ -448,53 +714,318 @@ export default function App() {
           )}
         </div>
         {/* グラフエリア（2つの棒グラフのみ表示） */}
-  <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: isMobile ? 12 : 20, minHeight: isMobile ? 400 : 600, background: '#fff', boxSizing: 'border-box', width: '100%', overflowX: 'auto' }}>
-          {/* <h2 style={{ marginTop: 0, marginBottom: 20 }}>支出分析</h2> */}
+  <div style={{ 
+    border: '1px solid #e8eaed', 
+    borderRadius: 8, 
+    padding: isMobile ? 16 : 20, 
+    minHeight: isMobile ? 400 : 600, 
+    background: '#ffffff', 
+    boxSizing: 'border-box', 
+    width: '100%', 
+    overflowX: 'auto',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+  }}>
+      <h2 style={{ 
+        marginTop: 0, 
+        marginBottom: 24, 
+        color: '#202124', 
+        fontSize: 18, 
+        fontWeight: '500',
+        textAlign: 'left',
+        fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+        borderBottom: '1px solid #e8eaed', 
+        paddingBottom: 12 
+      }}>支出グラフ</h2>
           {/* 今年の月別ジャンル別支出グラフ */}
-          <div style={{ marginBottom: 40 }}>
-            <h3 style={{ marginBottom: 15, fontSize: 18 }}>月別支出</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={monthlyGenreArray}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tickFormatter={m => `${parseInt(m, 10)}月`} />
-                  <YAxis tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} width={80} />
-                <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                <Legend />
-                {genres.map((g, idx) => (
-                  <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
-          <div>
-            <h3 style={{ marginBottom: 15, fontSize: 18 }}>日別支出</h3>
-            <ResponsiveContainer width="100%" height={isMobile ? 600 : 250}>
+          <div style={{ 
+            marginBottom: 10,
+            padding: isMobile ? 12 : 16,
+            background: '#f8f9fa',
+            borderRadius: 8,
+            border: '1px solid #e8eaed',
+            overflow: 'hidden',
+            width: '100%',
+            boxSizing: 'border-box'
+          }}>
+            <h3 style={{ 
+              marginBottom: 16, 
+              fontSize: 16, 
+              color: '#202124',
+              fontWeight: '500',
+              textAlign: 'left',
+              fontFamily: 'Roboto, Arial, sans-serif',
+              margin: '0 0 16px 0'
+            }}>
+              {currentYear}年の支出 (月別)
+            </h3>
+              <ResponsiveContainer width="100%" height={isMobile ? 350 : 265}>
               {isMobile ? (
-                <BarChart data={dailyGenreArray} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <YAxis type="category" dataKey="day" tickFormatter={d => `${parseInt(d, 10)}`} interval={0} width={40} />
-                  <XAxis type="number" tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} />
-                  <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                  <Legend />
+                <BarChart 
+                  data={monthlyGenreArray}
+                  layout="vertical"
+                  margin={{ 
+                    top: 0, 
+                    right: 10, 
+                    left: 10, 
+                    bottom: 10 
+                  }}
+                  barCategoryGap="10%"
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#dadce0" 
+                    horizontal={false}
+                    vertical={true}
+                  />
+                  <YAxis 
+                    type="category"
+                    dataKey="month" 
+                    tickFormatter={m => `${parseInt(m, 10)}月`}
+                    interval={0}
+                    width={40}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
+                  />
+                  <XAxis 
+                    type="number"
+                    tickFormatter={value => `${Math.round(value)}円`} 
+                    domain={[0, 'dataMax']} 
+                    allowDecimals={false}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
+                  />
+                  <Tooltip 
+                    formatter={value => [`${value.toLocaleString()}円`, '']}
+                    labelFormatter={label => `${parseInt(label, 10)}月`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e8eaed',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
+                  <Legend 
+                    content={renderLegend}
+                    wrapperStyle={{ paddingTop: '10px' }}
+                  />
                   {genres.map((g, idx) => (
-                    <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                    <Bar 
+                      key={g} 
+                      dataKey={g} 
+                      stackId="a"
+                      fill={COLORS[idx % COLORS.length]} 
+                      name={g}
+                      radius={idx === genres.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
+                    />
                   ))}
                 </BarChart>
               ) : (
-                <BarChart data={dailyGenreArray}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" tickFormatter={d => `${parseInt(d, 10)}`} interval={0} />
-                  <YAxis tickFormatter={value => `${value.toLocaleString()}円`} domain={[0, 'dataMax']} allowDecimals={false} width={80} />
-                  <Tooltip formatter={value => `${value.toLocaleString()}円`} />
-                  <Legend />
+                <BarChart 
+                  data={monthlyGenreArray}
+                  margin={{ 
+                    top: 10, 
+                    right: isMobile ? 10 : 10, 
+                    left: isMobile ? 10 : 10, 
+                    bottom: isMobile ? 10 : 10 
+                  }}
+                  barCategoryGap="15%"
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#dadce0" 
+                    horizontal={true}
+                    vertical={true}
+                  />
+                  <XAxis 
+                    dataKey="month" 
+                    tickFormatter={m => `${parseInt(m, 10)}月`}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 14, fill: '#5f6368' }}
+                  />
+                  <YAxis 
+                    tickFormatter={value => `${value.toLocaleString()}円`} 
+                    domain={[0, 'dataMax']} 
+                    allowDecimals={false} 
+                    width={isMobile ? 90 : 80}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 14, fill: '#5f6368' }}
+                  />
+                  <Tooltip 
+                    formatter={value => [`${value.toLocaleString()}円`, '']}
+                    labelFormatter={label => `${parseInt(label, 10)}月`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e8eaed',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
+                  <Legend 
+                    content={renderLegend}
+                  />
                   {genres.map((g, idx) => (
-                    <Bar key={g} dataKey={g} stackId="a" fill={COLORS[idx % COLORS.length]} name={g} />
+                    <Bar 
+                      key={g} 
+                      dataKey={g} 
+                      stackId="a"
+                      fill={COLORS[idx % COLORS.length]} 
+                      name={g}
+                      radius={idx === genres.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                    />
                   ))}
                 </BarChart>
               )}
             </ResponsiveContainer>
           </div>
+          {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
+          <div style={{ 
+            padding: isMobile ? 12 : 16,
+            background: '#f8f9fa',
+            borderRadius: 8,
+            border: '1px solid #e8eaed',
+            overflow: 'hidden',
+            width: '100%',
+            boxSizing: 'border-box'
+          }}>
+            <h3 style={{ 
+              marginBottom: 16, 
+              fontSize: 16, 
+              color: '#202124',
+              fontWeight: '500',
+              textAlign: 'left',
+              fontFamily: 'Roboto, Arial, sans-serif',
+              margin: '0 0 16px 0'
+            }}>
+              {currentMonth}月の支出 (日別)
+            </h3>
+            <ResponsiveContainer width="100%" height={isMobile ? 500 : 265}>
+              {isMobile ? (
+                <BarChart 
+                  data={dailyGenreArray} 
+                  layout="vertical"
+                  margin={{ top: 0, right: 10, left: 0, bottom: 10 }}
+                  barCategoryGap="10%"
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#dadce0" 
+                    horizontal={false}
+                    vertical={true}
+                  />
+                  <YAxis 
+                    type="category" 
+                    dataKey="day" 
+                    tickFormatter={d => `${parseInt(d, 10)}日`} 
+                    interval={0} 
+                    width={45}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
+                  />
+                  <XAxis 
+                    type="number" 
+                    tickFormatter={value => `${Math.round(value)}円`} 
+                    domain={[0, 'dataMax']} 
+                    allowDecimals={false}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
+                  />
+                  <Tooltip 
+                    formatter={value => [`${value.toLocaleString()}円`, '']}
+                    labelFormatter={label => `${parseInt(label, 10)}日`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e8eaed',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
+                  <Legend 
+                    content={renderLegend}
+                    wrapperStyle={{ paddingTop: '10px' }}
+                  />
+                  {genres.map((g, idx) => (
+                    <Bar 
+                      key={g} 
+                      dataKey={g} 
+                      stackId="a"
+                      fill={COLORS[idx % COLORS.length]} 
+                      name={g}
+                      radius={idx === genres.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              ) : (
+                <BarChart 
+                  data={dailyGenreArray}
+                  margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                  barCategoryGap="15%"
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#dadce0" 
+                    horizontal={true}
+                    vertical={true}
+                  />
+                  <XAxis 
+                    dataKey="day" 
+                    tickFormatter={d => `${parseInt(d, 10)}`} 
+                    interval={0}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 13, fill: '#5f6368' }}
+                  />
+                  <YAxis 
+                    tickFormatter={value => `${value.toLocaleString()}円`} 
+                    domain={[0, 'dataMax']} 
+                    allowDecimals={false} 
+                    width={80}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 13, fill: '#5f6368' }}
+                  />
+                  <Tooltip 
+                    formatter={value => [`${value.toLocaleString()}円`, '']}
+                    labelFormatter={label => `${parseInt(label, 10)}日`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e8eaed',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
+                  <Legend 
+                    content={renderLegend}
+                  />
+                  {genres.map((g, idx) => (
+                    <Bar 
+                      key={g} 
+                      dataKey={g} 
+                      stackId="a"
+                      fill={COLORS[idx % COLORS.length]} 
+                      name={g}
+                      radius={idx === genres.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              )}
+            </ResponsiveContainer>
+          </div>
+        </div>
+        </div>
         </div>
       </div>
     </div>
