@@ -742,64 +742,130 @@ export default function App() {
               {currentYear}年の支出 (月別)
             </h3>
               <ResponsiveContainer width="100%" height={isMobile ? 350 : 265}>
-              <BarChart 
-                data={monthlyGenreArray}
-                margin={{ 
-                  top: 10, 
-                  right: isMobile ? 10 : 10, 
-                  left: isMobile ? 10 : 10, 
-                  bottom: isMobile ? 10 : 10 
-                }}
-                barCategoryGap="15%"
-              >
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="#dadce0" 
-                  horizontal={true}
-                  vertical={true}
-                />
-                <XAxis 
-                  dataKey="month" 
-                  tickFormatter={m => `${parseInt(m, 10)}月`}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: '#5f6368' }}
-                />
-                <YAxis 
-                  tickFormatter={value => `${value.toLocaleString()}円`} 
-                  domain={[0, 'dataMax']} 
-                  allowDecimals={false} 
-                  width={isMobile ? 90 : 80}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: '#5f6368' }}
-                />
-                <Tooltip 
-                  formatter={value => [`${value.toLocaleString()}円`, '']}
-                  labelFormatter={label => `${parseInt(label, 10)}月`}
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e8eaed',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                    fontSize: '14px',
-                    fontFamily: 'Roboto, Arial, sans-serif'
+              {isMobile ? (
+                <BarChart 
+                  data={monthlyGenreArray}
+                  layout="vertical"
+                  margin={{ 
+                    top: 20, 
+                    right: 16, 
+                    left: 50, 
+                    bottom: 20 
                   }}
-                />
-                <Legend 
-                  content={renderLegend}
-                />
-                {genres.map((g, idx) => (
-                  <Bar 
-                    key={g} 
-                    dataKey={g} 
-                    stackId="a"
-                    fill={COLORS[idx % COLORS.length]} 
-                    name={g}
-                    radius={idx === genres.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                  barCategoryGap="10%"
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#dadce0" 
+                    horizontal={false}
+                    vertical={true}
                   />
-                ))}
-              </BarChart>
+                  <YAxis 
+                    type="category"
+                    dataKey="month" 
+                    tickFormatter={m => `${parseInt(m, 10)}月`}
+                    interval={0}
+                    width={40}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fill: '#5f6368' }}
+                  />
+                  <XAxis 
+                    type="number"
+                    tickFormatter={value => `${Math.round(value / 1000)}k`} 
+                    domain={[0, 'dataMax']} 
+                    allowDecimals={false}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fill: '#5f6368' }}
+                  />
+                  <Tooltip 
+                    formatter={value => [`${value.toLocaleString()}円`, '']}
+                    labelFormatter={label => `${parseInt(label, 10)}月`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e8eaed',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontSize: '12px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
+                  <Legend 
+                    content={renderLegend}
+                    wrapperStyle={{ paddingTop: '10px' }}
+                  />
+                  {genres.map((g, idx) => (
+                    <Bar 
+                      key={g} 
+                      dataKey={g} 
+                      stackId="a"
+                      fill={COLORS[idx % COLORS.length]} 
+                      name={g}
+                      radius={idx === genres.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              ) : (
+                <BarChart 
+                  data={monthlyGenreArray}
+                  margin={{ 
+                    top: 10, 
+                    right: isMobile ? 10 : 10, 
+                    left: isMobile ? 10 : 10, 
+                    bottom: isMobile ? 10 : 10 
+                  }}
+                  barCategoryGap="15%"
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#dadce0" 
+                    horizontal={true}
+                    vertical={true}
+                  />
+                  <XAxis 
+                    dataKey="month" 
+                    tickFormatter={m => `${parseInt(m, 10)}月`}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
+                  />
+                  <YAxis 
+                    tickFormatter={value => `${value.toLocaleString()}円`} 
+                    domain={[0, 'dataMax']} 
+                    allowDecimals={false} 
+                    width={isMobile ? 90 : 80}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#5f6368' }}
+                  />
+                  <Tooltip 
+                    formatter={value => [`${value.toLocaleString()}円`, '']}
+                    labelFormatter={label => `${parseInt(label, 10)}月`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e8eaed',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontSize: '14px',
+                      fontFamily: 'Roboto, Arial, sans-serif'
+                    }}
+                  />
+                  <Legend 
+                    content={renderLegend}
+                  />
+                  {genres.map((g, idx) => (
+                    <Bar 
+                      key={g} 
+                      dataKey={g} 
+                      stackId="a"
+                      fill={COLORS[idx % COLORS.length]} 
+                      name={g}
+                      radius={idx === genres.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              )}
             </ResponsiveContainer>
           </div>
           {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
