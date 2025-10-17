@@ -73,25 +73,43 @@ export default function App() {
       document.head.appendChild(style);
     }
   }, []);
-  // 凡例をカスタムレンダリングするコンポーネント(フォント色を黒に変更・中央寄せ)
-  const renderLegend = (props) => (
-    <ul style={{ color: '#000', fontSize: '12px', fontFamily: 'Roboto, Arial, sans-serif', margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-      {props.payload.map((entry, index) => (
-        <li key={`item-${index}`} style={{ marginRight: 16, display: 'flex', alignItems: 'center' }}>
-          <span style={{
-            display: 'inline-block',
-            width: 12,
-            height: 12,
-            backgroundColor: entry.color,
-            marginRight: 6,
-            borderRadius: 2,
-            border: '1px solid #ccc'
-          }} />
-          <span style={{ color: '#000' }}>{entry.value}</span>
-        </li>
-      ))}
-    </ul>
-  );
+  // 凡例をカスタムレンダリングするコンポーネント(フォント色を黒に変更・レスポンシブ対応)
+  const renderLegend = (props) => {
+    const isMobileForLegend = typeof window !== 'undefined' && window.innerWidth <= 600;
+    return (
+      <ul style={{ 
+        color: '#000', 
+        fontSize: isMobileForLegend ? '10px' : '12px', 
+        fontFamily: 'Roboto, Arial, sans-serif', 
+        margin: 0, 
+        padding: 0, 
+        listStyle: 'none', 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        justifyContent: 'center',
+        gap: isMobileForLegend ? '8px' : '16px'
+      }}>
+        {props.payload.map((entry, index) => (
+          <li key={`item-${index}`} style={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            marginBottom: isMobileForLegend ? '4px' : '0'
+          }}>
+            <span style={{
+              display: 'inline-block',
+              width: isMobileForLegend ? 10 : 12,
+              height: isMobileForLegend ? 10 : 12,
+              backgroundColor: entry.color,
+              marginRight: 4,
+              borderRadius: 2,
+              border: '1px solid #ccc'
+            }} />
+            <span style={{ color: '#000' }}>{entry.value}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
   // DatePickerのz-indexを確実にするためのスタイル
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -256,7 +274,8 @@ export default function App() {
     <div style={{ 
       minHeight: '100vh',
       background: '#f8f9fa',
-      padding: isMobile ? 12 : 24
+      padding: isMobile ? 12 : 24,
+      overflowX: 'hidden'
     }}>
       <div style={{ 
         maxWidth: 1200, 
@@ -265,7 +284,9 @@ export default function App() {
         background: '#ffffff',
         borderRadius: 8,
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        border: '1px solid #e8eaed'
+        border: '1px solid #e8eaed',
+        width: '100%',
+        boxSizing: 'border-box'
       }}>
         {/* <div style={{
           padding: isMobile ? 16 : 24,
@@ -701,10 +722,13 @@ export default function App() {
           {/* 今年の月別ジャンル別支出グラフ */}
           <div style={{ 
             marginBottom: 32,
-            padding: 16,
+            padding: isMobile ? 12 : 16,
             background: '#f8f9fa',
             borderRadius: 8,
-            border: '1px solid #e8eaed'
+            border: '1px solid #e8eaed',
+            overflow: 'hidden',
+            width: '100%',
+            boxSizing: 'border-box'
           }}>
             <h3 style={{ 
               marginBottom: 16, 
@@ -717,10 +741,15 @@ export default function App() {
             }}>
               {currentYear}年の支出 (月別)
             </h3>
-            <ResponsiveContainer width={isMobile ? "100vw" : "100%"} height={265}>
+              <ResponsiveContainer width="100%" height={isMobile ? 350 : 265}>
               <BarChart 
                 data={monthlyGenreArray}
-                margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                margin={{ 
+                  top: 10, 
+                  right: isMobile ? 10 : 10, 
+                  left: isMobile ? 10 : 10, 
+                  bottom: isMobile ? 10 : 10 
+                }}
                 barCategoryGap="15%"
               >
                 <CartesianGrid 
@@ -740,7 +769,7 @@ export default function App() {
                   tickFormatter={value => `${value.toLocaleString()}円`} 
                   domain={[0, 'dataMax']} 
                   allowDecimals={false} 
-                  width={80}
+                  width={isMobile ? 90 : 80}
                   axisLine={false}
                   tickLine={false}
                   tick={{ fontSize: 12, fill: '#5f6368' }}
@@ -775,10 +804,13 @@ export default function App() {
           </div>
           {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
           <div style={{ 
-            padding: 16,
+            padding: isMobile ? 12 : 16,
             background: '#f8f9fa',
             borderRadius: 8,
-            border: '1px solid #e8eaed'
+            border: '1px solid #e8eaed',
+            overflow: 'hidden',
+            width: '100%',
+            boxSizing: 'border-box'
           }}>
             <h3 style={{ 
               marginBottom: 16, 
@@ -791,38 +823,38 @@ export default function App() {
             }}>
               {currentMonth}月の支出 (日別)
             </h3>
-            <ResponsiveContainer width="100%" height={isMobile ? 600 : 270}>
+            <ResponsiveContainer width="100%" height={isMobile ? 500 : 265}>
               {isMobile ? (
                 <BarChart 
                   data={dailyGenreArray} 
                   layout="vertical"
-                  margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
-                  barCategoryGap="15%"
+                  margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                  barCategoryGap="10%"
                 >
                   <CartesianGrid 
                     strokeDasharray="3 3" 
                     stroke="#dadce0" 
-                    horizontal={true}
+                    horizontal={false}
                     vertical={true}
                   />
                   <YAxis 
                     type="category" 
                     dataKey="day" 
-                    tickFormatter={d => `${parseInt(d, 10)}`} 
+                    tickFormatter={d => `${parseInt(d, 10)}日`} 
                     interval={0} 
-                    width={30}
+                    width={45}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: '#5f6368' }}
+                    tick={{ fontSize: 10, fill: '#5f6368' }}
                   />
                   <XAxis 
                     type="number" 
-                    tickFormatter={value => `${value.toLocaleString()}円`} 
+                    tickFormatter={value => `${Math.round(value)}円`} 
                     domain={[0, 'dataMax']} 
                     allowDecimals={false}
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: '#5f6368' }}
+                    tick={{ fontSize: 10, fill: '#5f6368' }}
                   />
                   <Tooltip 
                     formatter={value => [`${value.toLocaleString()}円`, '']}
@@ -832,12 +864,13 @@ export default function App() {
                       border: '1px solid #e8eaed',
                       borderRadius: '8px',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      fontSize: '14px',
+                      fontSize: '12px',
                       fontFamily: 'Roboto, Arial, sans-serif'
                     }}
                   />
                   <Legend 
                     content={renderLegend}
+                    wrapperStyle={{ paddingTop: '10px' }}
                   />
                   {genres.map((g, idx) => (
                     <Bar 
@@ -853,7 +886,7 @@ export default function App() {
               ) : (
                 <BarChart 
                   data={dailyGenreArray}
-                  margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                  margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
                   barCategoryGap="15%"
                 >
                   <CartesianGrid 
