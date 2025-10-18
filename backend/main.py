@@ -29,6 +29,21 @@ CREATE TABLE IF NOT EXISTS expenses (
     amount INTEGER NOT NULL
 )
 """)
+
+# ジャンルテーブル作成
+c.execute("""
+CREATE TABLE IF NOT EXISTS genres (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+
+# デフォルトジャンルの初期化
+default_genres = ['食費', '交通費', '消耗品', 'サブスク', '特別費', 'その他']
+for genre in default_genres:
+    c.execute("INSERT OR IGNORE INTO genres (name) VALUES (?)", (genre,))
+
 conn.commit()
 conn.close()
 
@@ -39,6 +54,14 @@ class Expense(BaseModel):
 
 class ExpenseWithId(Expense):
     id: int
+
+class Genre(BaseModel):
+    name: str
+
+class GenreWithId(BaseModel):
+    id: int
+    name: str
+    created_at: str
 
 @app.post("/expenses")
 def add_expense(expense: Expense):
@@ -64,6 +87,46 @@ def delete_expense(expense_id: int):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
+    conn.commit()
+    conn.close()
+    return {"message": "deleted"}
+
+# ジャンル関連のAPI
+@app.get("/genres", response_model=List[GenreWithId])
+def get_genres():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, name, created_at FROM genres ORDER BY id")
+    rows = c.fetchall()
+    conn.close()
+    return [GenreWithId(id=row[0], name=row[1], created_at=row[2]) for row in rows]
+
+@app.post("/genres")
+def add_genre(genre: Genre):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute("INSERT INTO genres (name) VALUES (?)", (genre.name,))
+        conn.commit()
+        conn.close()
+        return {"message": "ok"}
+    except sqlite3.IntegrityError:
+        conn.close()
+        return {"error": "Genre already exists"}
+
+@app.delete("/genres/{genre_id}")
+def delete_genre(genre_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    # ジャンルが使用されているかチェック
+    c.execute("SELECT COUNT(*) FROM expenses WHERE genre = (SELECT name FROM genres WHERE id = ?)", (genre_id,))
+    count = c.fetchone()[0]
+    
+    if count > 0:
+        conn.close()
+        return {"error": "Cannot delete genre that is in use"}
+    
+    c.execute("DELETE FROM genres WHERE id = ?", (genre_id,))
     conn.commit()
     conn.close()
     return {"message": "deleted"}

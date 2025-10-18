@@ -128,16 +128,9 @@ export default function App() {
 
   const [showGenreEdit, setShowGenreEdit] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  // localStorageからジャンルを読み込み、なければデフォルトを使用
-  const [genres, setGenres] = useState(() => {
-    const savedGenres = localStorage.getItem('expenseGenres');
-    return savedGenres ? JSON.parse(savedGenres) : [...DEFAULT_GENRES];
-  });
-  const [genre, setGenre] = useState(() => {
-    const savedGenres = localStorage.getItem('expenseGenres');
-    const initialGenres = savedGenres ? JSON.parse(savedGenres) : DEFAULT_GENRES;
-    return initialGenres[0] || DEFAULT_GENRES[0];
-  });
+  // APIからジャンルを取得
+  const [genres, setGenres] = useState([]);
+  const [genre, setGenre] = useState('');
   const [amount, setAmount] = useState('');
   const [expenses, setExpenses] = useState([]);
   const [newGenre, setNewGenre] = useState('');
@@ -153,14 +146,104 @@ export default function App() {
     }
   };
 
+  // ジャンルデータを取得
+  const fetchGenres = async () => {
+    try {
+      const baseUrl = process.env.REACT_APP_API_URL.replace('/expenses', '');
+      const response = await fetch(`${baseUrl}/genres`);
+      const data = await response.json();
+      const genreNames = data.map(g => g.name);
+      setGenres(genreNames);
+      if (genreNames.length > 0 && !genre) {
+        setGenre(genreNames[0]);
+      }
+    } catch (error) {
+      console.error('ジャンルデータの取得に失敗しました:', error);
+      // APIが利用できない場合はデフォルトジャンルを使用
+      setGenres([...DEFAULT_GENRES]);
+      if (!genre) {
+        setGenre(DEFAULT_GENRES[0]);
+      }
+    }
+  };
+
+  // ジャンル追加
+  const addGenre = async (genreName) => {
+    try {
+      const baseUrl = process.env.REACT_APP_API_URL.replace('/expenses', '');
+      const response = await fetch(`${baseUrl}/genres`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: genreName })
+      });
+      const result = await response.json();
+      if (result.error) {
+        alert('ジャンルは既に存在します');
+        return false;
+      }
+      await fetchGenres(); // ジャンル一覧を再取得
+      return true;
+    } catch (error) {
+      console.error('ジャンル追加に失敗しました:', error);
+      return false;
+    }
+  };
+
+  // ジャンル削除
+  const deleteGenre = async (genreName) => {
+    try {
+      const baseUrl = process.env.REACT_APP_API_URL.replace('/expenses', '');
+      // ジャンルIDを取得
+      const genresResponse = await fetch(`${baseUrl}/genres`);
+      const genresData = await genresResponse.json();
+      const targetGenre = genresData.find(g => g.name === genreName);
+      
+      if (!targetGenre) {
+        alert('ジャンルが見つかりません');
+        return false;
+      }
+
+      const response = await fetch(`${baseUrl}/genres/${targetGenre.id}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (result.error) {
+        alert('使用中のジャンルは削除できません');
+        return false;
+      }
+      await fetchGenres(); // ジャンル一覧を再取得
+      return true;
+    } catch (error) {
+      console.error('ジャンル削除に失敗しました:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchExpenses();
+    fetchGenres();
   }, []);
 
-  // ジャンルが変更されたときにlocalStorageに保存
+  // ジャンル同期用のインターバル（5分ごと）
   useEffect(() => {
-    localStorage.setItem('expenseGenres', JSON.stringify(genres));
-  }, [genres]);
+    const interval = setInterval(() => {
+      fetchGenres();
+    }, 5 * 60 * 1000); // 5分ごと
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // ウィンドウフォーカス時にジャンルを同期
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchGenres();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -438,12 +521,13 @@ export default function App() {
                   />
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
                       const val = newGenre.trim();
                       if (val && !genres.includes(val)) {
-                        const newGenres = [...genres, val];
-                        setGenres(newGenres);
-                        setNewGenre('');
+                        const success = await addGenre(val);
+                        if (success) {
+                          setNewGenre('');
+                        }
                       }
                     }}
                     className="add-btn"
@@ -466,13 +550,18 @@ export default function App() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
                       const val = newGenre.trim();
                       if (val && genres.includes(val) && genres.length > 1) {
-                        const newGenres = genres.filter(x => x !== val);
-                        setGenres(newGenres);
-                        if (genre === val) setGenre(newGenres[0] || '');
-                        setNewGenre('');
+                        const success = await deleteGenre(val);
+                        if (success) {
+                          // 削除されたジャンルが現在選択されている場合は別のジャンルに変更
+                          if (genre === val) {
+                            const remainingGenres = genres.filter(x => x !== val);
+                            setGenre(remainingGenres[0] || '');
+                          }
+                          setNewGenre('');
+                        }
                       }
                     }}
                     className="trash-btn"
