@@ -669,7 +669,7 @@ export default function App() {
             padding: '0 32px',
             fontFamily: 'Google Sans, Roboto, Arial, sans-serif'
           }}>
-            支出管理アプリ
+            <b>shishutsukan</b>
           </h1>
           <p style={{
             color: '#5f6368',
@@ -679,7 +679,7 @@ export default function App() {
             padding: '0 32px',
             fontFamily: 'Roboto, Arial, sans-serif'
           }}>
-            アカウントでログインするか、新規作成してください
+            ログインするか<br />新しくアカウントを作成してください
           </p>
           
           {/* タブヘッダー */}
@@ -703,7 +703,7 @@ export default function App() {
                 setShowConfirmPassword(false);
               }}
             >
-              新規作成
+              アカウント作成
             </button>
           </div>
 
