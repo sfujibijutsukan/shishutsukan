@@ -2,6 +2,51 @@ import React, { useState, useEffect } from 'react';
 
 // 認証関連のCSS
 const authBtnStyle = `
+.auth-container {
+  max-width: 450px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e8eaed;
+  overflow: hidden;
+}
+.auth-tabs {
+  display: flex;
+  border-bottom: 1px solid #e8eaed;
+  background: #f8f9fa;
+}
+.auth-tab {
+  flex: 1;
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5f6368;
+  transition: all 0.2s;
+  font-family: 'Roboto, Arial, sans-serif';
+  position: relative;
+}
+.auth-tab.active {
+  color: #141619ff;
+  background: white;
+  font-weight: 600;
+}
+.auth-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #141619ff;
+}
+.auth-tab:hover:not(.active) {
+  color: #202124;
+  background: #e8eaed;
+}
 .auth-btn {
   background: #141619ff;
   color: white;
@@ -30,13 +75,7 @@ const authBtnStyle = `
   font-family: 'Roboto, Arial, sans-serif';
 }
 .auth-form {
-  max-width: 400px;
-  margin: 0 auto;
   padding: 32px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e8eaed;
 }
 .password-container {
   position: relative;
@@ -620,13 +659,14 @@ export default function App() {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <div className="auth-form">
+        <div className="auth-container">
           <h1 style={{ 
             textAlign: 'center', 
             color: '#202124', 
             fontSize: 28, 
             fontWeight: '400', 
-            margin: '0 0 8px 0',
+            margin: '24px 0 8px 0',
+            padding: '0 32px',
             fontFamily: 'Google Sans, Roboto, Arial, sans-serif'
           }}>
             支出管理アプリ
@@ -636,11 +676,38 @@ export default function App() {
             fontSize: 14,
             margin: '0 0 24px 0',
             textAlign: 'center',
+            padding: '0 32px',
             fontFamily: 'Roboto, Arial, sans-serif'
           }}>
-            {showRegister ? 'アカウントを作成' : 'ログイン'}
+            アカウントでログインするか、新規作成してください
           </p>
           
+          {/* タブヘッダー */}
+          <div className="auth-tabs">
+            <button 
+              className={`auth-tab ${!showRegister ? 'active' : ''}`}
+              onClick={() => {
+                setShowRegister(false);
+                setAuthError('');
+                setShowLoginPassword(false);
+              }}
+            >
+              ログイン
+            </button>
+            <button 
+              className={`auth-tab ${showRegister ? 'active' : ''}`}
+              onClick={() => {
+                setShowRegister(true);
+                setAuthError('');
+                setShowPassword(false);
+                setShowConfirmPassword(false);
+              }}
+            >
+              新規作成
+            </button>
+          </div>
+
+          <div className="auth-form">
           {authError && (
             <div style={{
               background: '#fce8e6',
@@ -681,7 +748,7 @@ export default function App() {
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex="-1"
                 >
-                  {showPassword ? '⊘' : '⚪︎'}
+                  {showPassword ? '⊘' : '⚪'}
                 </button>
               </div>
               <div className="password-container">
@@ -700,32 +767,10 @@ export default function App() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   tabIndex="-1"
                 >
-                  {showConfirmPassword ? '⊘' : '○'}
+                  {showConfirmPassword ? '⊘' : '⚪︎'}
                 </button>
               </div>
               <button type="submit" className="auth-btn">アカウント作成</button>
-              <button 
-                type="button" 
-                onClick={() => {
-                  setShowRegister(false);
-                  setAuthError('');
-                  setRegisterData({ user_id: '', password: '', confirmPassword: '' });
-                  setShowPassword(false);
-                  setShowConfirmPassword(false);
-                }}
-                style={{
-                  background: 'transparent',
-                  color: '#1a73e8',
-                  border: 'none',
-                  padding: '12px',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  width: '100%',
-                  textDecoration: 'underline'
-                }}
-              >
-                ログインに戻る
-              </button>
             </form>
           ) : (
             <form onSubmit={handleLogin}>
@@ -753,32 +798,13 @@ export default function App() {
                   onClick={() => setShowLoginPassword(!showLoginPassword)}
                   tabIndex="-1"
                 >
-                  {showLoginPassword ? '⊘' : '○'}
+                  {showLoginPassword ? '⊘' : '⚪︎'}
                 </button>
               </div>
               <button type="submit" className="auth-btn">ログイン</button>
-              <button 
-                type="button" 
-                onClick={() => {
-                  setShowRegister(true);
-                  setAuthError('');
-                  setShowLoginPassword(false);
-                }}
-                style={{
-                  background: 'transparent',
-                  color: '#1a73e8',
-                  border: 'none',
-                  padding: '12px',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  width: '100%',
-                  textDecoration: 'underline'
-                }}
-              >
-                新しいアカウントを作成
-              </button>
             </form>
           )}
+          </div>
         </div>
       </div>
     );
