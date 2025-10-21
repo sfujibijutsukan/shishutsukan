@@ -76,6 +76,7 @@ const authBtnStyle = `
 }
 .auth-form {
   padding: 32px;
+  min-height: 250px;
 }
 .password-container {
   position: relative;
