@@ -183,6 +183,7 @@ export default function App() {
   // 認証状態管理
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState('');
+  const [currentUserId, setCurrentUserId] = useState('');
   const [showRegister, setShowRegister] = useState(false);
   const [loginData, setLoginData] = useState({ user_id: '', password: '' });
   const [registerData, setRegisterData] = useState({ user_id: '', password: '', confirmPassword: '' });
@@ -194,8 +195,10 @@ export default function App() {
   // ローカルストレージから認証状態を復元
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    if (token) {
+    const userId = localStorage.getItem('currentUserId');
+    if (token && userId) {
       setAuthToken(token);
+      setCurrentUserId(userId);
       setIsAuthenticated(true);
     }
   }, []);
@@ -215,8 +218,10 @@ export default function App() {
       if (response.ok) {
         const data = await response.json();
         setAuthToken(data.access_token);
+        setCurrentUserId(loginData.user_id);
         setIsAuthenticated(true);
         localStorage.setItem('authToken', data.access_token);
+        localStorage.setItem('currentUserId', loginData.user_id);
         setLoginData({ user_id: '', password: '' });
       } else {
         const error = await response.json();
@@ -272,7 +277,9 @@ export default function App() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setAuthToken('');
+    setCurrentUserId('');
     localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUserId');
     setExpenses([]);
     setGenres([]);
   };
@@ -845,7 +852,7 @@ export default function App() {
               margin: 0,
               fontFamily: 'Google Sans, Roboto, Arial, sans-serif'
             }}>
-              支出管理
+              <b>shishutsukan</b>
             </h1>
             <p style={{
               color: '#5f6368',
@@ -853,13 +860,24 @@ export default function App() {
               margin: '4px 0 0 0',
               fontFamily: 'Roboto, Arial, sans-serif'
             }}>
-              家計の支出を記録・分析できます
+              {/* 家計の支出を記録・分析できます */}
             </p>
+            {currentUserId && (
+              <p style={{
+                color: '#141619ff',
+                fontSize: 13,
+                margin: '8px 0 0 0',
+                fontFamily: 'Roboto, Arial, sans-serif',
+                fontWeight: '500'
+              }}>
+                ログイン中のユーザ: {currentUserId}
+              </p>
+            )}
           </div>
           <button
             onClick={handleLogout}
             style={{
-              background: '#ea4335',
+              background: '#141619ff',
               color: 'white',
               border: 'none',
               padding: '8px 16px',
