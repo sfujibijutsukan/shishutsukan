@@ -1,4 +1,70 @@
 import React, { useState, useEffect } from 'react';
+
+// 認証関連のCSS
+const authBtnStyle = `
+.auth-btn {
+  background: #141619ff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  font-family: 'Roboto, Arial, sans-serif';
+  margin: 8px 0;
+  width: 100%;
+}
+.auth-btn:hover {
+  background: #0f1115;
+}
+.auth-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 14px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  font-family: 'Roboto, Arial, sans-serif';
+}
+.auth-form {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 32px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e8eaed;
+}
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  font-size: 16px;
+  color: #5f6368;
+  z-index: 1;
+  border-radius: 3px;
+  font-weight: normal;
+  min-width: 24px;
+  text-align: center;
+  line-height: 1;
+}
+.password-toggle:hover {
+  color: #202124;
+  background: #f8f9fa;
+}
+`;
+
 // ゴミ箱アイコン用CSS
 const trashBtnStyle = `
 .trash-btn {
@@ -64,6 +130,112 @@ const DEFAULT_GENRES = ['食費', '交通費', '消耗品', 'サブスク', '特
 const COLORS = ['#4163adff', '#875095ff', '#ea4335', '#dd5bbeff', '#fbbc04', '#34a853', '#1a73e8', '#137333', '#f9ab00', '#d93025'];
 
 export default function App() {
+  // 認証関連のCSSをheadに追加
+  useEffect(() => {
+    if (!document.getElementById('auth-btn-style')) {
+      const style = document.createElement('style');
+      style.id = 'auth-btn-style';
+      style.innerHTML = authBtnStyle;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  // 認証状態管理
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState('');
+  const [showRegister, setShowRegister] = useState(false);
+  const [loginData, setLoginData] = useState({ user_id: '', password: '' });
+  const [registerData, setRegisterData] = useState({ user_id: '', password: '', confirmPassword: '' });
+  const [authError, setAuthError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  // ローカルストレージから認証状態を復元
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setAuthToken(token);
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  // ログイン処理
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    try {
+      const baseUrl = process.env.REACT_APP_API_URL.replace('/expenses', '');
+      const response = await fetch(`${baseUrl}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginData)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAuthToken(data.access_token);
+        setIsAuthenticated(true);
+        localStorage.setItem('authToken', data.access_token);
+        setLoginData({ user_id: '', password: '' });
+      } else {
+        const error = await response.json();
+        setAuthError(error.detail || 'ログインに失敗しました');
+      }
+    } catch (error) {
+      setAuthError('ネットワークエラーが発生しました');
+    }
+  };
+
+  // ユーザー登録処理
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    
+    // パスワード確認チェック
+    if (registerData.password !== registerData.confirmPassword) {
+      setAuthError('パスワードが一致しません');
+      return;
+    }
+    
+    // パスワードの長さチェック
+    if (registerData.password.length < 4) {
+      setAuthError('パスワードは4文字以上で入力してください');
+      return;
+    }
+    
+    try {
+      const baseUrl = process.env.REACT_APP_API_URL.replace('/expenses', '');
+      const response = await fetch(`${baseUrl}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: registerData.user_id,
+          password: registerData.password
+        })
+      });
+      
+      if (response.ok) {
+        setShowRegister(false);
+        setRegisterData({ user_id: '', password: '', confirmPassword: '' });
+        alert('アカウントが作成されました。ログインしてください。');
+      } else {
+        const error = await response.json();
+        setAuthError(error.detail || 'アカウント作成に失敗しました');
+      }
+    } catch (error) {
+      setAuthError('ネットワークエラーが発生しました');
+    }
+  };
+
+  // ログアウト処理
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setAuthToken('');
+    localStorage.removeItem('authToken');
+    setExpenses([]);
+    setGenres([]);
+  };
   // ゴミ箱アイコン用CSSをheadに追加
   useEffect(() => {
     if (!document.getElementById('trash-btn-style')) {
@@ -137,10 +309,19 @@ export default function App() {
 
   // 支出データを取得
   const fetchExpenses = async () => {
+    if (!authToken) return;
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}`);
-      const data = await response.json();
-      setExpenses(data);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setExpenses(data);
+      } else if (response.status === 401) {
+        handleLogout();
+      }
     } catch (error) {
       console.error('支出データの取得に失敗しました:', error);
     }
@@ -148,14 +329,23 @@ export default function App() {
 
   // ジャンルデータを取得
   const fetchGenres = async () => {
+    if (!authToken) return;
     try {
       const baseUrl = process.env.REACT_APP_API_URL.replace('/expenses', '');
-      const response = await fetch(`${baseUrl}/genres`);
-      const data = await response.json();
-      const genreNames = data.map(g => g.name);
-      setGenres(genreNames);
-      if (genreNames.length > 0 && !genre) {
-        setGenre(genreNames[0]);
+      const response = await fetch(`${baseUrl}/genres`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const genreNames = data.map(g => g.name);
+        setGenres(genreNames);
+        if (genreNames.length > 0 && !genre) {
+          setGenre(genreNames[0]);
+        }
+      } else if (response.status === 401) {
+        handleLogout();
       }
     } catch (error) {
       console.error('ジャンルデータの取得に失敗しました:', error);
@@ -169,13 +359,21 @@ export default function App() {
 
   // ジャンル追加
   const addGenre = async (genreName) => {
+    if (!authToken) return false;
     try {
       const baseUrl = process.env.REACT_APP_API_URL.replace('/expenses', '');
       const response = await fetch(`${baseUrl}/genres`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
         body: JSON.stringify({ name: genreName })
       });
+      if (response.status === 401) {
+        handleLogout();
+        return false;
+      }
       const result = await response.json();
       if (result.error) {
         alert('ジャンルは既に存在します');
@@ -191,10 +389,19 @@ export default function App() {
 
   // ジャンル削除
   const deleteGenre = async (genreName) => {
+    if (!authToken) return false;
     try {
       const baseUrl = process.env.REACT_APP_API_URL.replace('/expenses', '');
       // ジャンルIDを取得
-      const genresResponse = await fetch(`${baseUrl}/genres`);
+      const genresResponse = await fetch(`${baseUrl}/genres`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (genresResponse.status === 401) {
+        handleLogout();
+        return false;
+      }
       const genresData = await genresResponse.json();
       const targetGenre = genresData.find(g => g.name === genreName);
       
@@ -204,8 +411,15 @@ export default function App() {
       }
 
       const response = await fetch(`${baseUrl}/genres/${targetGenre.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
       });
+      if (response.status === 401) {
+        handleLogout();
+        return false;
+      }
       const result = await response.json();
       if (result.error) {
         alert('使用中のジャンルは削除できません');
@@ -220,21 +434,25 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchExpenses();
-    fetchGenres();
-  }, []);
+    if (isAuthenticated && authToken) {
+      fetchExpenses();
+      fetchGenres();
+    }
+  }, [isAuthenticated, authToken]);
 
   // ジャンル同期用のインターバル（5分ごと）
   useEffect(() => {
+    if (!isAuthenticated) return;
     const interval = setInterval(() => {
       fetchGenres();
     }, 5 * 60 * 1000); // 5分ごと
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isAuthenticated]);
 
   // ウィンドウフォーカス時にジャンルを同期
   useEffect(() => {
+    if (!isAuthenticated) return;
     const handleFocus = () => {
       fetchGenres();
     };
@@ -243,10 +461,12 @@ export default function App() {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!authToken) return;
+    
     const expense = {
       date: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD形式
       genre,
@@ -254,11 +474,18 @@ export default function App() {
     };
     
     try {
-  await fetch(`${process.env.REACT_APP_API_URL}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
         body: JSON.stringify(expense)
       });
+      if (response.status === 401) {
+        handleLogout();
+        return;
+      }
       setAmount('');
       // データを再取得してグラフを更新
       fetchExpenses();
@@ -329,8 +556,19 @@ export default function App() {
     // 支出削除処理
     const handleDelete = async (id) => {
       if (!window.confirm('本当に削除しますか？')) return;
+      if (!authToken) return;
+      
       try {
-  const res = await fetch(`${process.env.REACT_APP_API_URL}/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/${id}`, { 
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+        if (res.status === 401) {
+          handleLogout();
+          return;
+        }
         if (!res.ok) throw new Error('削除API失敗');
         setExpenses([]); // 一度空にしてから再取得
         await fetchExpenses();
@@ -370,6 +608,182 @@ export default function App() {
       };
     }
   }, []);
+
+  // 認証されていない場合はログイン画面を表示
+  if (!isAuthenticated) {
+    return (
+      <div style={{ 
+        minHeight: '100vh',
+        background: '#f8f9fa',
+        padding: 24,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div className="auth-form">
+          <h1 style={{ 
+            textAlign: 'center', 
+            color: '#202124', 
+            fontSize: 28, 
+            fontWeight: '400', 
+            margin: '0 0 8px 0',
+            fontFamily: 'Google Sans, Roboto, Arial, sans-serif'
+          }}>
+            支出管理アプリ
+          </h1>
+          <p style={{
+            color: '#5f6368',
+            fontSize: 14,
+            margin: '0 0 24px 0',
+            textAlign: 'center',
+            fontFamily: 'Roboto, Arial, sans-serif'
+          }}>
+            {showRegister ? 'アカウントを作成' : 'ログイン'}
+          </p>
+          
+          {authError && (
+            <div style={{
+              background: '#fce8e6',
+              color: '#d93025',
+              padding: '12px',
+              borderRadius: '4px',
+              marginBottom: '16px',
+              fontSize: '14px',
+              border: '1px solid #fce8e6'
+            }}>
+              {authError}
+            </div>
+          )}
+          
+          {showRegister ? (
+            <form onSubmit={handleRegister}>
+              <input
+                type="text"
+                placeholder="ユーザーID"
+                value={registerData.user_id}
+                onChange={(e) => setRegisterData({...registerData, user_id: e.target.value})}
+                className="auth-input"
+                required
+              />
+              <div className="password-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="パスワード"
+                  value={registerData.password}
+                  onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                  className="auth-input"
+                  style={{ paddingRight: '40px' }}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex="-1"
+                >
+                  {showPassword ? '⊘' : '⚪︎'}
+                </button>
+              </div>
+              <div className="password-container">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="パスワードを再入力"
+                  value={registerData.confirmPassword}
+                  onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
+                  className="auth-input"
+                  style={{ paddingRight: '40px' }}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  tabIndex="-1"
+                >
+                  {showConfirmPassword ? '⊘' : '○'}
+                </button>
+              </div>
+              <button type="submit" className="auth-btn">アカウント作成</button>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setShowRegister(false);
+                  setAuthError('');
+                  setRegisterData({ user_id: '', password: '', confirmPassword: '' });
+                  setShowPassword(false);
+                  setShowConfirmPassword(false);
+                }}
+                style={{
+                  background: 'transparent',
+                  color: '#1a73e8',
+                  border: 'none',
+                  padding: '12px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  width: '100%',
+                  textDecoration: 'underline'
+                }}
+              >
+                ログインに戻る
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleLogin}>
+              <input
+                type="text"
+                placeholder="ユーザーID"
+                value={loginData.user_id}
+                onChange={(e) => setLoginData({...loginData, user_id: e.target.value})}
+                className="auth-input"
+                required
+              />
+              <div className="password-container">
+                <input
+                  type={showLoginPassword ? "text" : "password"}
+                  placeholder="パスワード"
+                  value={loginData.password}
+                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                  className="auth-input"
+                  style={{ paddingRight: '40px' }}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  tabIndex="-1"
+                >
+                  {showLoginPassword ? '⊘' : '○'}
+                </button>
+              </div>
+              <button type="submit" className="auth-btn">ログイン</button>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setShowRegister(true);
+                  setAuthError('');
+                  setShowLoginPassword(false);
+                }}
+                style={{
+                  background: 'transparent',
+                  color: '#1a73e8',
+                  border: 'none',
+                  padding: '12px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  width: '100%',
+                  textDecoration: 'underline'
+                }}
+              >
+                新しいアカウントを作成
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ 
       minHeight: '100vh',
@@ -388,29 +802,50 @@ export default function App() {
         width: '100%',
         boxSizing: 'border-box'
       }}>
-        {/* <div style={{
+        <div style={{
           padding: isMobile ? 16 : 24,
-          borderBottom: '1px solid #e8eaed'
+          borderBottom: '1px solid #e8eaed',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}>
-          <h1 style={{ 
-            textAlign: 'left', 
-            color: '#202124', 
-            fontSize: isMobile ? 24 : 28, 
-            fontWeight: '400', 
-            margin: 0,
-            fontFamily: 'Google Sans, Roboto, Arial, sans-serif'
-          }}>
-            支出管理
-          </h1>
-          <p style={{
-            color: '#5f6368',
-            fontSize: 14,
-            margin: '4px 0 0 0',
-            fontFamily: 'Roboto, Arial, sans-serif'
-          }}>
-            家計の支出を記録・分析できます
-          </p>
-        </div> */}
+          <div>
+            <h1 style={{ 
+              textAlign: 'left', 
+              color: '#202124', 
+              fontSize: isMobile ? 24 : 28, 
+              fontWeight: '400', 
+              margin: 0,
+              fontFamily: 'Google Sans, Roboto, Arial, sans-serif'
+            }}>
+              支出管理
+            </h1>
+            <p style={{
+              color: '#5f6368',
+              fontSize: 14,
+              margin: '4px 0 0 0',
+              fontFamily: 'Roboto, Arial, sans-serif'
+            }}>
+              家計の支出を記録・分析できます
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: '#ea4335',
+              color: 'white',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              fontFamily: 'Roboto, Arial, sans-serif'
+            }}
+          >
+            ログアウト
+          </button>
+        </div>
         <div style={{ padding: isMobile ? 16 : 24 }}>
         <div
           style={
