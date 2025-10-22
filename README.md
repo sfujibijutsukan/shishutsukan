@@ -74,8 +74,13 @@ React（フロントエンド） + FastAPI（バックエンド） + SQLite（�
 - `DELETE /genres/{id}`：ジャンル削除（使用中は削除不可）
 
 **データベース構造**
-- `expenses` テーブル：`id`, `date`, `genre`, `amount`
+- `expenses` テーブル：`id`, `date`, `genre_id`, `amount`（`genre_id` は `genres(id)` を参照する外部キー）
 - `genres` テーブル：`id`, `name`, `created_at`（デフォルトジャンル自動初期化）
+
+補足:
+- SQLiteの外部キー制約を有効化し、存在しないジャンルに紐づく支出は登録できません。
+- `GET /expenses` は内部で `genres` を JOIN してジャンル名を返すため、従来どおり `genre` 文字列を含むレスポンス形式です。
+- 旧バージョンからの自動マイグレーションを実装しています。旧 `expenses.genre(TEXT)` のデータは `genres` に不足分を自動補完したうえで `genre_id` に変換されます。
 
 ---
 
