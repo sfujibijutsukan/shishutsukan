@@ -27,7 +27,7 @@ def get_conn():
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
 
-# DB初期化およびマイグレーション
+# DB初期化
 conn = get_conn()
 c = conn.cursor()
 
@@ -42,72 +42,18 @@ CREATE TABLE IF NOT EXISTS genres (
 """
 )
 
-# 既存スキーマ確認（expensesにgenre_idが無ければ移行する）
-c.execute("PRAGMA table_info(expenses)")
-cols = [row[1] for row in c.fetchall()]
-
-if not cols:
-    # expensesテーブルが無い場合は新スキーマで作成
-    c.execute(
-        """
-    CREATE TABLE IF NOT EXISTS expenses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT NOT NULL,
-        genre_id INTEGER NOT NULL,
-        amount INTEGER NOT NULL,
-        FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE RESTRICT ON UPDATE CASCADE
-    )
+# expensesテーブル（新スキーマ）
+c.execute(
     """
-    )
-else:
-    # 旧スキーマ（genre TEXT）が存在する場合はマイグレーション
-    if "genre_id" not in cols:
-        # 不足しているジャンル名をgenresに追加してデータを保全
-        try:
-            # 旧テーブルからジャンル一覧を取得（存在しない場合に備えてtry）
-            c.execute("SELECT DISTINCT genre FROM expenses")
-            old_genres = [row[0] for row in c.fetchall()]
-        except sqlite3.OperationalError:
-            old_genres = []
-
-        if old_genres:
-            # 既存のgenresを取得
-            c.execute("SELECT name FROM genres")
-            existing = {row[0] for row in c.fetchall()}
-            for g in old_genres:
-                if g and g not in existing:
-                    c.execute("INSERT OR IGNORE INTO genres (name) VALUES (?)", (g,))
-
-        # 新テーブルを作成
-        c.execute(
-            """
-        CREATE TABLE IF NOT EXISTS expenses_new (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            genre_id INTEGER NOT NULL,
-            amount INTEGER NOT NULL,
-            FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE RESTRICT ON UPDATE CASCADE
-        )
-        """
-        )
-
-        # 旧->新へデータ移行（ジャンル名をIDに変換）
-        try:
-            c.execute(
-                """
-            INSERT INTO expenses_new (id, date, genre_id, amount)
-            SELECT e.id, e.date, g.id, e.amount
-            FROM expenses e
-            JOIN genres g ON g.name = e.genre
-            """
-            )
-        except sqlite3.OperationalError:
-            # 旧テーブルが無いなどの場合はスキップ
-            pass
-
-        # 旧テーブルを置き換え
-        c.execute("DROP TABLE IF EXISTS expenses")
-        c.execute("ALTER TABLE expenses_new RENAME TO expenses")
+CREATE TABLE IF NOT EXISTS expenses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    genre_id INTEGER NOT NULL,
+    amount INTEGER NOT NULL,
+    FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE RESTRICT ON UPDATE CASCADE
+)
+"""
+)
 
 # デフォルトジャンルの初期化
 default_genres = ['食費', '交通費', '消耗品', 'サブスク', '特別費', 'その他']

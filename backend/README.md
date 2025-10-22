@@ -1,6 +1,6 @@
 ## データベース構成（スキーマ）
 
-アプリ起動時、必要なテーブル作成と簡易マイグレーションを行います。SQLite の外部キー制約は接続毎に有効化され、全接続で `PRAGMA foreign_keys = ON` を実施しています。
+アプリ起動時、必要なテーブル（新スキーマ前提）の作成を行います。SQLite の外部キー制約は接続毎に有効化され、全接続で `PRAGMA foreign_keys = ON` を実施しています。
 
 DDL（概念図）:
 ```sql
@@ -30,18 +30,6 @@ CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);
 初期データ:
 - デフォルトジャンルを自動投入（重複は無視）
 	- `['食費', '交通費', '消耗品', 'サブスク', '特別費', 'その他']`
-
-### マイグレーション（旧スキーマ → 新スキーマ）
-
-旧バージョンでは `expenses.genre TEXT` を持つ構成でした。起動時に以下を実施します。
-1. 旧テーブルから使用中のジャンル名を抽出し、`genres` に不足分を補完（INSERT OR IGNORE）。
-2. `expenses_new`（`genre_id` を持つ新スキーマ）を作成。
-3. `expenses` から `expenses_new` へ、`JOIN genres ON genres.name = expenses.genre` で移送。
-4. 旧 `expenses` を DROP、`expenses_new` を `expenses` にリネーム。
-
-注意:
-- 旧データに空/不正なジャンル名があると JOIN で移行されない可能性があります。移行前に `app.db` のバックアップ取得を推奨します。
-- 必要に応じて「不明」ジャンルを作成し、手動補正する運用も可能です。
 
 ## バリデーションとエラーハンドリング
 
@@ -106,19 +94,4 @@ POST `/genres`
 DELETE `/genres/{id}`
 - 使用中: `{ "error": "Cannot delete genre that is in use" }`
 - 成功: `{ "message": "deleted" }`
-
-## トラブルシュート
-
-- 外部キー制約が効いていない/参照整合性が壊れる:
-	- SQLite は接続毎に `PRAGMA foreign_keys = ON` が必要です。本アプリでは接続生成時に必ず実行しています。
-
-- 旧DBからの移行で一部の支出が表示されない:
-	- 旧 `expenses.genre` が空/不正名で、`genres` との JOIN に失敗している可能性があります。`genres` に該当名を追加して再移行するか、手動で補正してください。
-
-- CORS の警告:
-	- デモ用途のため `*` 許可です。本番で必要なオリジンに絞ってください。
-
-## ライセンス/著作権
-
-本リポジトリの LICENSE に従います。
 
