@@ -254,11 +254,21 @@ export default function App() {
     };
     
     try {
-  await fetch(`${process.env.REACT_APP_API_URL}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expense)
       });
+      if (!res.ok) {
+        // エラー詳細を表示
+        let msg = '登録に失敗しました。ジャンルが存在するか確認してください。';
+        try {
+          const data = await res.json();
+          if (data?.detail || data?.error) msg = data.detail || data.error;
+        } catch {}
+        alert(msg);
+        return;
+      }
       setAmount('');
       // データを再取得してグラフを更新
       fetchExpenses();
