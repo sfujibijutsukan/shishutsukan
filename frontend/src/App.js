@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-// アイコン用CSS（ゴミ箱・追加・編集）
-const trashBtnStyle = `
+// 3D効果とモダンスタイル用CSS
+const modernStyle = `
 .trash-btn {
-  background: transparent;
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
   border: none;
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.1), -1px -1px 2px rgba(255,255,255,0.8);
+}
+.trash-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.15), -2px -2px 4px rgba(255,255,255,0.9);
 }
 .trash-icon {
   color: #202124;
@@ -26,21 +31,26 @@ const trashBtnStyle = `
 .trash-btn:hover .trash-label {
   color: #ea4335;
 }
- .add-btn {
-   background: transparent;
-   border: none !important;
-   cursor: pointer;
-   padding: 4px;
-   border-radius: 4px;
-   transition: background 0.2s;
- }
- .add-icon {
-   color: #202124;
-   transition: color 0.2s;
- }
- .add-btn:hover .add-icon {
-   color: #34a853;
- }
+.add-btn {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border: none !important;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.1), -1px -1px 2px rgba(255,255,255,0.8);
+}
+.add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.15), -2px -2px 4px rgba(255,255,255,0.9);
+}
+.add-icon {
+  color: #202124;
+  transition: color 0.2s;
+}
+.add-btn:hover .add-icon {
+  color: #34a853;
+}
 .add-label {
   color: #202124;
   font-weight: bold;
@@ -51,31 +61,106 @@ const trashBtnStyle = `
 .add-btn:hover .add-label {
   color: #34a853;
 }
- .edit-btn {
-   background: transparent;
-   border: none !important;
-   cursor: pointer;
-   padding: 4px;
-   border-radius: 4px;
-   transition: background 0.2s;
- }
- .edit-icon {
-   color: #141619ff;
-   transition: color 0.2s;
- }
- .edit-btn.editing .edit-icon {
-   color: #1a73e8 !important; 
- }
- .edit-label {
-   color: #141619ff;
-   font-weight: bold;
-   font-size: 14px;
-   margin-left: 4px;
-   transition: color 0.2s;
- }
- .edit-btn:hover .edit-label {
-   color: #1a73e8;
- }
+.edit-btn {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border: none !important;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.1), -1px -1px 2px rgba(255,255,255,0.8);
+}
+.edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.15), -2px -2px 4px rgba(255,255,255,0.9);
+}
+.edit-icon {
+  color: #141619ff;
+  transition: color 0.2s;
+}
+.edit-btn.editing .edit-icon {
+  color: #1a73e8 !important; 
+}
+.edit-label {
+  color: #141619ff;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+.edit-btn:hover .edit-label {
+  color: #1a73e8;
+}
+.modern-container {
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border-radius: 16px;
+  box-shadow: 
+    8px 8px 16px rgba(0,0,0,0.1),
+    -4px -4px 8px rgba(255,255,255,0.9),
+    inset 1px 1px 2px rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.modern-card {
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border-radius: 12px;
+  box-shadow: 
+    4px 4px 8px rgba(0,0,0,0.08),
+    -2px -2px 4px rgba(255,255,255,0.8),
+    inset 1px 1px 2px rgba(255,255,255,0.3);
+  border: 1px solid rgba(232,234,237,0.5);
+}
+.modern-input {
+  background: linear-gradient(145deg, #ffffff, #fafbfc);
+  border-radius: 8px;
+  border: 1px solid #e8eaed;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.05), inset -1px -1px 2px rgba(255,255,255,0.7);
+  transition: all 0.3s ease;
+}
+.modern-input:focus {
+  box-shadow: 
+    inset 2px 2px 4px rgba(0,0,0,0.08),
+    inset -1px -1px 2px rgba(255,255,255,0.8),
+    0 0 0 2px rgba(26,115,232,0.2);
+}
+.modern-button {
+  background: linear-gradient(145deg, #141619ff, #0f1115);
+  border-radius: 12px;
+  box-shadow: 
+    4px 4px 8px rgba(20,22,25,0.3),
+    -2px -2px 4px rgba(255,255,255,0.1),
+    inset 1px 1px 2px rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+}
+.modern-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    6px 6px 12px rgba(20,22,25,0.4),
+    -3px -3px 6px rgba(255,255,255,0.15),
+    inset 1px 1px 2px rgba(255,255,255,0.15);
+}
+.genre-button {
+  background: linear-gradient(145deg, #f8f9fa, #e8eaed);
+  border-radius: 10px;
+  border: 1px solid rgba(232,234,237,0.8);
+  box-shadow: 
+    3px 3px 6px rgba(0,0,0,0.08),
+    -2px -2px 4px rgba(255,255,255,0.9);
+  transition: all 0.3s ease;
+}
+.genre-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    4px 4px 8px rgba(0,0,0,0.12),
+    -3px -3px 6px rgba(255,255,255,1);
+}
+.genre-button.selected {
+  background: linear-gradient(145deg, #141619ff, #0f1115);
+  color: #ffffff;
+  box-shadow: 
+    inset 2px 2px 4px rgba(0,0,0,0.3),
+    inset -1px -1px 2px rgba(255,255,255,0.1),
+    3px 3px 6px rgba(20,22,25,0.2);
+}
 `;
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ja } from 'date-fns/locale';
@@ -89,12 +174,12 @@ const DEFAULT_GENRES = ['食費', '交通費', '消耗品', 'サブスク', '特
 const COLORS = ['#4163adff', '#875095ff', '#ea4335', '#dd5bbeff', '#fbbc04', '#34a853', '#1a73e8', '#137333', '#f9ab00', '#d93025'];
 
 export default function App() {
-  // ゴミ箱アイコン用CSSをheadに追加
+  // モダンスタイル用CSSをheadに追加
   useEffect(() => {
-    if (!document.getElementById('trash-btn-style')) {
+    if (!document.getElementById('modern-style')) {
       const style = document.createElement('style');
-      style.id = 'trash-btn-style';
-      style.innerHTML = trashBtnStyle;
+      style.id = 'modern-style';
+      style.innerHTML = modernStyle;
       document.head.appendChild(style);
     }
   }, []);
@@ -396,14 +481,11 @@ export default function App() {
       padding: isMobile ? 12 : 24,
       overflowX: 'hidden'
     }}>
-      <div style={{
+      <div className="modern-container" style={{
         maxWidth: isMobile ? '100%' : 1200,
         margin: '0 auto',
         padding: 0,
         background: '#ffffff',
-        borderRadius: 8,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        border: '1px solid #e8eaed',
         width: '100%',
         boxSizing: 'border-box'
       }}>
@@ -416,16 +498,13 @@ export default function App() {
             }
           >
             {/* 支出入力フォーム＋支出一覧 */}
-            <div style={{
-              border: '1px solid #e8eaed',
-              borderRadius: 8,
+            <div className="modern-card" style={{
               padding: isMobile ? 16 : 20,
               minHeight: isMobile ? 400 : 600,
               background: '#ffffff',
               boxSizing: 'border-box',
               width: '100%',
-              overflowX: 'auto',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              overflowX: 'auto'
             }}>
               <h2 style={{
                 marginTop: 0,
@@ -490,11 +569,8 @@ export default function App() {
                         type="button"
                         key={g}
                         onClick={() => setGenre(g)}
+                        className={`genre-button ${genre === g ? 'selected' : ''}`}
                         style={{
-                          background: genre === g ? '#141619ff' : '#f8f9fa',
-                          color: genre === g ? '#ffffff' : '#5f6368',
-                          border: '1px solid ' + (genre === g ? '#141619ff' : '#dadce0'),
-                          borderRadius: 4,
                           width: 100,
                           height: 36,
                           padding: 0,
@@ -505,7 +581,6 @@ export default function App() {
                           cursor: 'pointer',
                           fontSize: 14,
                           fontWeight: '500',
-                          transition: 'all 0.2s',
                           fontFamily: 'Roboto, Arial, sans-serif'
                         }}
                       >
@@ -527,11 +602,10 @@ export default function App() {
                           value={newGenre}
                           onChange={e => setNewGenre(e.target.value)}
                           placeholder="ジャンル名を入力"
+                          className="modern-input"
                           style={{
                             width: 160,
                             padding: '8px 12px',
-                            borderRadius: 4,
-                            border: '1px solid #dadce0',
                             fontSize: 14,
                             fontFamily: 'Roboto, Arial, sans-serif',
                             outline: 'none'
@@ -671,11 +745,10 @@ export default function App() {
                         type="number"
                         value={amount}
                         onChange={e => setAmount(e.target.value)}
+                        className="modern-input"
                         style={{
                           width: '100%',
                           padding: '8px 12px',
-                          border: '1px solid #dadce0',
-                          borderRadius: 4,
                           fontSize: 14,
                           fontFamily: 'Roboto, Arial, sans-serif',
                           outline: 'none'
@@ -690,21 +763,17 @@ export default function App() {
                 </div>
                 <button
                   type="submit"
+                  className="modern-button"
                   style={{
                     width: '100%',
                     padding: '12px 24px',
-                    background: '#141619ff',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: 4,
                     fontSize: 14,
                     cursor: 'pointer',
                     fontWeight: '500',
-                    transition: 'background-color 0.2s',
                     fontFamily: 'Roboto, Arial, sans-serif'
                   }}
-                  onMouseOver={e => e.target.style.backgroundColor = '#0f1115'}
-                  onMouseOut={e => e.target.style.backgroundColor = '#141619ff'}
                 >
                   登録
                 </button>
@@ -820,16 +889,13 @@ export default function App() {
               )}
             </div>
             {/* グラフエリア（2つの棒グラフのみ表示） */}
-            <div style={{
-              border: '1px solid #e8eaed',
-              borderRadius: 8,
+            <div className="modern-card" style={{
               padding: isMobile ? 16 : 20,
               minHeight: isMobile ? 400 : 600,
               background: '#ffffff',
               boxSizing: 'border-box',
               width: '100%',
-              overflowX: 'auto',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              overflowX: 'auto'
             }}>
               <h2 style={{
                 marginTop: 0,
@@ -843,12 +909,10 @@ export default function App() {
                 paddingBottom: 12
               }}>支出グラフ</h2>
               {/* 今年の月別ジャンル別支出グラフ */}
-              <div style={{
-                marginBottom: 10,
+              <div className="modern-card" style={{
+                marginBottom: 16,
                 padding: isMobile ? 12 : 16,
                 background: '#f8f9fa',
-                borderRadius: 8,
-                border: '1px solid #e8eaed',
                 overflow: 'hidden',
                 width: '100%',
                 boxSizing: 'border-box'
@@ -992,11 +1056,9 @@ export default function App() {
                 </ResponsiveContainer>
               </div>
               {/* 今月の日別ジャンル別支出グラフ（最大31日分） */}
-              <div style={{
+              <div className="modern-card" style={{
                 padding: isMobile ? 12 : 16,
                 background: '#f8f9fa',
-                borderRadius: 8,
-                border: '1px solid #e8eaed',
                 overflow: 'hidden',
                 width: '100%',
                 boxSizing: 'border-box'
