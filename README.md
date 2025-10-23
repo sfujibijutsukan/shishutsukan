@@ -31,9 +31,11 @@ React（フロントエンド） + FastAPI（バックエンド） + SQLite（�
 ---
 
 ## 使い方
-1. .env ファイルを作成し、APIのURLを設定（例: `REACT_APP_API_URL=http://○○.○○.○○.○○:8000/expenses`）
-   - IPアドレスは自分の環境に合わせて変更してください。
-   - **注意：.envファイルはfrontendディレクトリに配置してください。**
+1. docker-compose.ymlのREACT_APP_API_URL環境変数を必要に応じて編集してください（デフォルトはローカルホスト）
+   ```yaml
+   environment:
+     - REACT_APP_API_URL=http://localhost:8000/expenses
+   ```
 2. Docker Composeで起動
    ```bash
    docker compose up -d
