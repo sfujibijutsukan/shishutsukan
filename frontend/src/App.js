@@ -542,10 +542,6 @@ export default function App() {
                           onClick={async () => {
                             const val = newGenre.trim();
                             if (!val) return;
-                            if (genres.includes(val)) {
-                              alert('同名のジャンルが既に存在します');
-                              return;
-                            }
                             const success = await addGenre(val);
                             if (success) {
                               setNewGenre('');
@@ -569,7 +565,6 @@ export default function App() {
                           </svg>
                           <span className="add-label">追加</span>
                         </button>
-                        {/* <span style={{ color: '#5f6368', fontSize: 14 }}>選択中: <strong style={{ color: '#202124' }}>{genre || '-'}</strong></span> */}
                         <button
                           type="button"
                           onClick={async () => {
