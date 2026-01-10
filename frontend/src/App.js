@@ -309,11 +309,15 @@ export default function App() {
   // 今年の月別ジャンル集計
   const today = new Date();
   const currentYear = today.getFullYear().toString();
+  const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0');
+  // 選択中の年・月（グラフ表示に使用）
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const allMonths = Array.from({ length: 12 }, (_, i) => i + 1);
   const monthlyGenreData = {};
   expenses.forEach(expense => {
     const [year, month] = expense.date.split('-');
-    if (year !== currentYear) return;
+    if (year !== selectedYear) return;
     if (!monthlyGenreData[month]) monthlyGenreData[month] = {};
     if (!monthlyGenreData[month][expense.genre]) monthlyGenreData[month][expense.genre] = 0;
     monthlyGenreData[month][expense.genre] += expense.amount;
@@ -326,18 +330,17 @@ export default function App() {
     return obj;
   });
 
-  // 今月の日別ジャンル集計
-  const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0');
+  // 選択中の年・月の日別ジャンル集計
   const dailyGenreData = {};
   expenses.forEach(expense => {
     const [year, month, day] = expense.date.split('-');
-    if (year !== currentYear || month !== currentMonth) return;
+    if (year !== selectedYear || month !== selectedMonth) return;
     if (!dailyGenreData[day]) dailyGenreData[day] = {};
     if (!dailyGenreData[day][expense.genre]) dailyGenreData[day][expense.genre] = 0;
     dailyGenreData[day][expense.genre] += expense.amount;
   });
   // 棒グラフ用データ（日ごと、今月のみ）
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const daysInMonth = new Date(parseInt(selectedYear, 10), parseInt(selectedMonth, 10), 0).getDate();
   const dailyGenreArray = Array.from({ length: daysInMonth }, (_, i) => {
     const dayStr = (i + 1).toString().padStart(2, '0');
     const obj = { day: dayStr };
@@ -360,8 +363,6 @@ export default function App() {
 
   // 年・月選択用ステート
   const allYears = Array.from(new Set(expenses.map(e => e.date.substring(0, 4)))).sort();
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
   // 選択中の年・月の支出一覧
   const filteredExpenses = expenses.filter(e => {
@@ -862,7 +863,7 @@ export default function App() {
                   fontFamily: 'Roboto, Arial, sans-serif',
                   margin: '0 0 16px 0'
                 }}>
-                  {currentYear}年の支出 (月別)
+                  {selectedYear}年の支出 (月別)
                 </h3>
                 <ResponsiveContainer width="100%" height={isMobile ? 350 : 265}>
                   {isMobile ? (
@@ -1010,7 +1011,7 @@ export default function App() {
                   fontFamily: 'Roboto, Arial, sans-serif',
                   margin: '0 0 16px 0'
                 }}>
-                  {currentMonth}月の支出 (日別)
+                  {parseInt(selectedMonth, 10)}月の支出 (日別)
                 </h3>
                 <ResponsiveContainer width="100%" height={isMobile ? 500 : 265}>
                   {isMobile ? (
